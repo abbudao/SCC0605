@@ -1,5 +1,5 @@
 options{
-LOOKAHEAD = 2;
+LOOKAHEAD = 1;
 STATIC = false ;
 }
 PARSER_BEGIN(Jason)
@@ -46,7 +46,7 @@ PARSER_END(Jason)
     TOKEN: {<THEN: "then">}
     TOKEN: {<ARRAY: "array">}
     TOKEN: {<EOL: ";">} 
-    TOKEN: {<IDENTIFIER: ("_")* (["a"-"z", "A"-"Z"])+ (<NUM>)*>}
+    TOKEN: {<IDENTIFIER: ("_")* (["a"-"z", "A"-"Z", "_"])+ (<NUM>)*>}
     TOKEN: {<LBR: "[">}
     TOKEN: {<RBR: "]">}
     TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
@@ -133,7 +133,7 @@ PARSER_END(Jason)
     void VarDecls():
     {}
     {
-        VarDecl() (VarDecl())* 
+        VarDecl() ( VarDecl())* 
     }
 
     void VarDecl():
@@ -151,7 +151,7 @@ PARSER_END(Jason)
     void IdList():
     {}
     {
-        (<IDENTIFIER>)* <IDENTIFIER>
+        (<IDENTIFIER> <COMA>)* <IDENTIFIER>
     }
 
     void SubProgramDecls():
