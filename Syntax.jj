@@ -7,7 +7,7 @@ PARSER_BEGIN(Jason)
     public static void main(String[] args)
         throws ParseException, TokenMgrError{
         Jason parser = new Jason(System.in);
-        parser.Start();
+        parser.Program();
 
         }
 
