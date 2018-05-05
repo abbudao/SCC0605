@@ -1,5 +1,5 @@
 options{
-LOOKAHEAD = 1;
+LOOKAHEAD = 2;
 STATIC = false ;
 }
 PARSER_BEGIN(Jason)
@@ -20,37 +20,6 @@ PARSER_END(Jason)
     TOKEN: {<PROGRAM: "program">}
     TOKEN: {<BEGIN: "begin">}
     TOKEN: {<END: "end">}
-    TOKEN: {<EOL: ";">} 
-    TOKEN: {<IDENTIFIER: (["a"-"z", "A"-"Z"])+>}
-    TOKEN: {<ARRAY: "array">}
-    TOKEN: {<LBR: "[">}
-    TOKEN: {<RBR: "]">}
-    TOKEN: {<RECORD: "record">}
-    TOKEN: {<TYPES: "types">}
-    TOKEN: {<VARIABLES: "variables">}
-    TOKEN: {<REAL: "real">}
-    TOKEN: {<INT: "integer">}
-    TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
-    TOKEN: {<PROC: "procedure">}
-    TOKEN: {<PARAM: "parameters">}
-    TOKEN: {<VAR: "var">}
-    TOKEN: {<FUNCTION: "function">}
-    TOKEN: {<RETURNS: "returns">}
-    TOKEN: {<RETURN: "return">}
-    TOKEN: {<LP: "(">}
-    TOKEN: {<RP: ")">}
-    TOKEN: {<SLASH: "/">}
-    TOKEN: {<TIL: "~">}
-    TOKEN: {<PLUS: "+">}
-    TOKEN: {<LESS: "-">}
-    TOKEN: {<TIMES: "*">}
-    TOKEN: {<LESSTHAN: "<">}
-    TOKEN: {<GREATERTHAN: ">">}
-    TOKEN: {<EXCLAMATION: "!">}
-    TOKEN: {<POINT: ".">}
-    TOKEN: {<ASK: "?">}
-    TOKEN: {<GOE: ">=">}
-    TOKEN: {<LOE: "<=">}
     TOKEN: {<READ: "read">}
     TOKEN: {<WRITE: "write">}
     TOKEN: {<IF: "if">}
@@ -63,12 +32,44 @@ PARSER_END(Jason)
     TOKEN: {<UNTIL: "until">}
     TOKEN: {<ENDUNTIL: "enduntil">}
     TOKEN: {<CALL: "call">}
+    TOKEN: {<RECORD: "record">}
+    TOKEN: {<TYPES: "types">}
+    TOKEN: {<VARIABLES: "variables">}
+    TOKEN: {<REAL: "real">}
+    TOKEN: {<INT: "integer">}
+    TOKEN: {<PROC: "procedure">}
+    TOKEN: {<PARAM: "parameters">}
+    TOKEN: {<VAR: "var">}
+    TOKEN: {<FUNCTION: "function">}
+    TOKEN: {<RETURNS: "returns">}
+    TOKEN: {<RETURN: "return">}
+    TOKEN: {<THEN: "then">}
+    TOKEN: {<ARRAY: "array">}
+    TOKEN: {<EOL: ";">} 
+    TOKEN: {<IDENTIFIER: (["a"-"z", "A"-"Z"])+>}
+    TOKEN: {<LBR: "[">}
+    TOKEN: {<RBR: "]">}
+    TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
+    TOKEN: {<LP: "(">}
+    TOKEN: {<RP: ")">}
+    TOKEN: {<SLASH: "\\">}
+    TOKEN: {<TIL: "~">}
+    TOKEN: {<PLUS: "+">}
+    TOKEN: {<LESS: "-">}
+    TOKEN: {<TIMES: "*">}
+    TOKEN: {<LESSTHAN: "<">}
+    TOKEN: {<GREATERTHAN: ">">}
+    TOKEN: {<EXCLAMATION: "!">}
+    TOKEN: {<POINT: ".">}
+    TOKEN: {<ASK: "?">}
+    TOKEN: {<GOE: ">=">}
+    TOKEN: {<LOE: "<=">}
     TOKEN: {<EQUAL: "=">}
     TOKEN: {<EQUALS: "==">}
-    TOKEN: {<THEN: "then">}
     TOKEN: {<COLON: ":">}
     TOKEN: {<COMA: ",">}
     TOKEN: {<AND: "&">}
+    TOKEN: {<DIV: "/">}
     /*Programa e Bloco*/
     void Program():
     {}
@@ -226,16 +227,16 @@ PARSER_END(Jason)
     {
         (<READ> | <WRITE>) Variable()
         | <SET> Variable() <EQUAL> Expression()
-        | <IF> Condition() <THEN> Statements() ElseClause()
-        | <WHILE> Condition() <DO> [Statements()] <ENDWHILE>
-        | <UNTIL> Condition() <DO> [Statements()] <ENDUNTIL>
+        | <IF> Condition_Exp() <THEN> Statements() ElseClause()
+        | <WHILE> Condition_Exp() <DO> [Statements()] <ENDWHILE>
+        | <UNTIL> Condition_Exp() <DO> [Statements()] <ENDUNTIL>
         | <CALL> <IDENTIFIER> [ArgList()]
-        | Ternary()
+        | Condition_Exp()
     }
-    void Ternary():
+    void Condition_Exp():
     {}
     {
-        Condition()<ASK> [Statements()] <COLON> [Statements()]
+        Condition()[<ASK> [Statements()] <COLON> [Statements()] ]
     }
     void ElseClause():
     {}
@@ -245,7 +246,7 @@ PARSER_END(Jason)
     void ReturnStatement():
     {}
     {
-        <EOL> <RETURN><LP>Condition()<RP>
+        <EOL> <RETURN><LP>Condition_Exp()<RP>
     }
 
     void ArgList():
@@ -257,7 +258,7 @@ PARSER_END(Jason)
     void Arguments():
     {}
     {
-        (Condition() <COMA>)* Condition()
+        (Condition_Exp() <COMA>)* Condition_Exp()
     }
     void Condition():
     {}
@@ -299,9 +300,8 @@ PARSER_END(Jason)
         [<TIL>] (Variable()
         | <NUM>
         | <STRING>
-        | <LP> Condition() <RP>
-        | <IDENTIFIER> ArgList()
-        | Ternary())
+        | <LP> Condition_Exp() <RP>
+        | <IDENTIFIER> ArgList() )
     }
     void Variable():
     {}
@@ -328,7 +328,7 @@ PARSER_END(Jason)
     void MultOp():
     {}
     {
-        <TIMES>
+        <TIMES> | <DIV>
     }
     /*
     hProgrami ::= hHeader i [hDeclSeci] hBlocki ‘.’ (1)
