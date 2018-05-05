@@ -15,7 +15,7 @@ PARSER_BEGIN(Jason)
 PARSER_END(Jason)
 
     SKIP: {" "}
-    SKIP: {"\n" | "\r" | "\r\n"}
+    SKIP: {"\n" | "\r" | "\r\n" | "\t"}
     TOKEN: {<NUM: (["0"-"9"])+>}
     TOKEN: {<PROGRAM: "program">}
     TOKEN: {<BEGIN: "begin">}
@@ -46,7 +46,7 @@ PARSER_END(Jason)
     TOKEN: {<THEN: "then">}
     TOKEN: {<ARRAY: "array">}
     TOKEN: {<EOL: ";">} 
-    TOKEN: {<IDENTIFIER: (["a"-"z", "A"-"Z"])+>}
+    TOKEN: {<IDENTIFIER: ("_")* (["a"-"z", "A"-"Z"])+ (<NUM>)*>}
     TOKEN: {<LBR: "[">}
     TOKEN: {<RBR: "]">}
     TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
