@@ -13,3 +13,7 @@ javac {Aqui vão todos os arquivos .java}
 # TESTE:
 
 cat test.txt | java Jason
+
+OU
+
+java Jason < test.txt
