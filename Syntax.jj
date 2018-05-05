@@ -12,7 +12,7 @@ PARSER_BEGIN(Adder)
         }
 
     }
-PARSER_END(Adder)
+PARSER_END(Jason)
 
     SKIP: {" "}
     SKIP: {"\n" | "\r" | "\r\n"}
@@ -32,6 +32,12 @@ PARSER_END(Adder)
     TOKEN: {<REAL: "real">}
     TOKEN: {<INT: "integer">}
     TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUMBERS> | " ")+ "\"">}
+    TOKEN: {<PROC: "procedure">}
+    TOKEN: {<PARAM: "parameters">}
+    TOKEN: {<VAR: "var">}
+    TOKEN: {<FUNCTION: "function">}
+    TOKEN: {<RETURNS: "returns">}
+    /*Programa e Bloco*/
     void Program():
     {}
     {
@@ -49,7 +55,7 @@ PARSER_END(Adder)
     {
         <BEGIN>Statements()<END>
     }
-
+    /*Declaracoes*/
     void DeclSec():
     {}
     {
@@ -102,16 +108,108 @@ PARSER_END(Adder)
     {
         DataType() IdList() <EOL>
     }
+
     void DataType():
     {}
     {
-        <REAL>|<INT>|<IDENTIFIER>|<STRING>
+        (<REAL>|<INT>|<IDENTIFIER>|<STRING>)
     }
+
     void IdList():
     {}
     {
-        
+        (<IDENTIFIER>)* <IDENTIFIER>
     }
+
+    void SubProgramDecls():
+    {}
+    {
+        [SubProgramDecls()] SubProgramDecl()
+    }
+    void SubProgramDecl():
+    {
+        ProcDecl() | FunctionDecl()
+    }
+    void ProcDecl():
+    {}
+    {
+        ProcHeader() SubProgramDeclSec() Block() <EOL>
+    }
+
+    void ProcHeader():
+    {}
+    {
+        <PROC><IDENTIFIER><EOL>
+    }
+    void SubProgramDeclSec():
+    {}
+    {
+        [ParamDeclSec()] DeclSec()
+    }
+    void ParamDeclSec():
+    {}
+    {
+        <PARAM> ParamDecls()
+    }
+
+    void ParamDecls():
+    {}
+    {
+        ParamDecl() (ParamDecls())*
+    }
+
+    void ParamDecl():
+    {}
+    {
+        [<VAR>] DataType() <IDENTIFIER> <EOL>
+    }
+
+    void FunctionDecl():
+    {}
+    {
+        FunctionHeader() SubProgramDeclSec() FunctionBlock() <EOL>
+    }
+
+    void FunctionHeader():
+    {}
+    {
+        <FUNCTION> <IDENTIFIER> <RETURNS> DataType() <EOL>
+    }
+
+    void FunctionBlock():
+    {}
+    {
+        <BEGIN> [Statements()] ReturnStatement() <END>
+    }
+    /* Comandos */
+    void Statements():
+    {}
+    {
+        Statement() (<EOL>Statement())*
+    }
+
+    void Statement():
+    {}
+    {
+        (<READ> | <WRITE>) Variable()
+        | <SET> Variable() <EQUAL> Expression()
+        | <IF> Condition() <THEN> Statements() ElseClause()
+        | <WHILE> Condition() <DO> [Statements()] <ENDWHILE>
+        | <UNTIL> Condition() <DO> [Statements()] <ENDUNTIL>
+        | <CALL> <IDENTIFIER> [ArgList()]
+        | Ternary()
+    }
+    void Ternary():
+    {}
+    {
+        Condition()<ASK> [Statements()] <COLON> [Statements()]
+    }
+    void ElseClause():
+    {}
+    {
+        [<ELSE>] [Statements()] <ENDIF>
+    }
+
     /*
     hProgrami ::= hHeader i [hDeclSeci] hBlocki ‘.’ (1)
 hHeader i ::= ‘program’ identifier ‘;’ (2)
