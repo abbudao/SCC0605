@@ -14,8 +14,7 @@ PARSER_BEGIN(Jason)
     }
 PARSER_END(Jason)
 
-    SKIP: {" "}
-    SKIP: {"\n" | "\r" | "\r\n" | "\t"}
+    SKIP: {" " | "\n" | "\r" | "\r\n" | "\t"}
     TOKEN: {<NUM: (["0"-"9"])+>}
     TOKEN: {<PROGRAM: "program">}
     TOKEN: {<BEGIN: "begin">}
@@ -45,8 +44,8 @@ PARSER_END(Jason)
     TOKEN: {<RETURN: "return">}
     TOKEN: {<THEN: "then">}
     TOKEN: {<ARRAY: "array">}
-    TOKEN: {<EOL: ";">} 
-    TOKEN: {<IDENTIFIER: ("_")* (["a"-"z", "A"-"Z"])+ (<NUM>)*>}
+    TOKEN: {<EOL: ";">}
+    TOKEN: {<IDENTIFIER: (["a"-"z", "A"-"Z", "_"])+ (<NUM>)*>}
     TOKEN: {<LBR: "[">}
     TOKEN: {<RBR: "]">}
     TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
@@ -133,7 +132,7 @@ PARSER_END(Jason)
     void VarDecls():
     {}
     {
-        VarDecl() (VarDecl())* 
+        VarDecl() (VarDecl())*
     }
 
     void VarDecl():
