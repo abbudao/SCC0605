@@ -2,11 +2,11 @@ options{
 LOOKAHEAD = 1;
 STATIC = false ;
 }
-PARSER_BEGIN(Adder)
-    class Adder{
+PARSER_BEGIN(Jason)
+    class Jason{
     public static void main(String[] args)
         throws ParseException, TokenMgrError{
-        Adder parser = new Adder(System.in);
+        Jason parser = new Jason(System.in);
         parser.Start();
 
         }
@@ -16,7 +16,6 @@ PARSER_END(Jason)
 
     SKIP: {" "}
     SKIP: {"\n" | "\r" | "\r\n"}
-    TOKEN: {<PLUS: "+">}
     TOKEN: {<NUM: (["0"-"9"])+>}
     TOKEN: {<PROGRAM: "program">}
     TOKEN: {<BEGIN: "begin">}
@@ -31,12 +30,45 @@ PARSER_END(Jason)
     TOKEN: {<VARIABLES: "variables">}
     TOKEN: {<REAL: "real">}
     TOKEN: {<INT: "integer">}
-    TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUMBERS> | " ")+ "\"">}
+    TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
     TOKEN: {<PROC: "procedure">}
     TOKEN: {<PARAM: "parameters">}
     TOKEN: {<VAR: "var">}
     TOKEN: {<FUNCTION: "function">}
     TOKEN: {<RETURNS: "returns">}
+    TOKEN: {<RETURN: "return">}
+    TOKEN: {<LP: "(">}
+    TOKEN: {<RP: ")">}
+    TOKEN: {<SLASH: "/">}
+    TOKEN: {<TIL: "~">}
+    TOKEN: {<PLUS: "+">}
+    TOKEN: {<LESS: "-">}
+    TOKEN: {<TIMES: "*">}
+    TOKEN: {<LESSTHAN: "<">}
+    TOKEN: {<GREATERTHAN: ">">}
+    TOKEN: {<EXCLAMATION: "!">}
+    TOKEN: {<POINT: ".">}
+    TOKEN: {<ASK: "?">}
+    TOKEN: {<GOE: ">=">}
+    TOKEN: {<LOE: "<=">}
+    TOKEN: {<READ: "read">}
+    TOKEN: {<WRITE: "write">}
+    TOKEN: {<IF: "if">}
+    TOKEN: {<SET: "set">}
+    TOKEN: {<ENDIF: "endif">}
+    TOKEN: {<ELSE: "else">}
+    TOKEN: {<DO: "do">}
+    TOKEN: {<WHILE: "while">}
+    TOKEN: {<ENDWHILE: "endwhile">}
+    TOKEN: {<UNTIL: "until">}
+    TOKEN: {<ENDUNTIL: "enduntil">}
+    TOKEN: {<CALL: "call">}
+    TOKEN: {<EQUAL: "=">}
+    TOKEN: {<EQUALS: "==">}
+    TOKEN: {<THEN: "then">}
+    TOKEN: {<COLON: ":">}
+    TOKEN: {<COMA: ",">}
+    TOKEN: {<AND: "&">}
     /*Programa e Bloco*/
     void Program():
     {}
@@ -100,7 +132,7 @@ PARSER_END(Jason)
     void VarDecls():
     {}
     {
-        (VarDecls())* VarDecl()
+        VarDecl() (VarDecl())* 
     }
 
     void VarDecl():
@@ -124,9 +156,10 @@ PARSER_END(Jason)
     void SubProgramDecls():
     {}
     {
-        [SubProgramDecls()] SubProgramDecl()
+        SubProgramDecl() (SubProgramDecl())*
     }
     void SubProgramDecl():
+    {}
     {
         ProcDecl() | FunctionDecl()
     }
@@ -209,7 +242,94 @@ PARSER_END(Jason)
     {
         [<ELSE>] [Statements()] <ENDIF>
     }
+    void ReturnStatement():
+    {}
+    {
+        <EOL> <RETURN><LP>Condition()<RP>
+    }
 
+    void ArgList():
+    {}
+    {
+        <LP> Arguments() <RP>
+    }
+
+    void Arguments():
+    {}
+    {
+        (Condition() <COMA>)* Condition()
+    }
+    void Condition():
+    {}
+    {
+        CompoundCondition() (<SLASH>CompoundCondition())*
+    }
+
+    void CompoundCondition():
+    {}
+    {
+        SimpleCondition() (<AND> SimpleCondition())*
+    }
+    void SimpleCondition():
+    {}
+    {
+        Expression() (RelOp() Expression())*
+    }
+    void Expression():
+    {}
+    {
+        Term() (MultOp() Unary())*
+    }
+    void Term():
+    {}
+    {
+        Unary() (MultOp() Factor())*
+    }
+
+    /*Expressoes*/
+    void Unary():
+    {}
+    {
+        (<PLUS>|<LESS>) Unary()
+        | Factor()
+    }
+    void Factor():
+    {}
+    {
+        [<TIL>] (Variable()
+        | <NUM>
+        | <STRING>
+        | <LP> Condition() <RP>
+        | <IDENTIFIER> ArgList()
+        | Ternary())
+    }
+    void Variable():
+    {}
+    {
+        <IDENTIFIER> [<RBR> Expression() <LBR>]
+            (<POINT> <IDENTIFIER> [<RBR>Expression()<LBR>])*
+    }
+    void RelOp():
+    {}
+    {
+        <EQUALS>
+        | <EXCLAMATION>
+        | <GREATERTHAN>
+        | <LESSTHAN>
+        | <LOE>
+        | <GOE>
+    }
+    void AddOp():
+    {}
+    {
+        <PLUS>
+        | <LESS>
+    }
+    void MultOp():
+    {}
+    {
+        <TIMES>
+    }
     /*
     hProgrami ::= hHeader i [hDeclSeci] hBlocki ‘.’ (1)
 hHeader i ::= ‘program’ identifier ‘;’ (2)
