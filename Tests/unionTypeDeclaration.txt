@@ -1,3 +1,0 @@
-program PROGRAM_NAME ; 
-types TYPE_NAME union real ID_NAME ;
-begin end .

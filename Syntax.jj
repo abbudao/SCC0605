@@ -91,8 +91,7 @@ PARSER_END(Jason)
     void DeclSec():
     {}
     {
-        <TYPES> TypeDecls() [(VarDeclSec() SubProgramDecls() | SubProgramDecls() | VarDeclSec())]
-        | [VarDeclSec()]SubProgramDecls()
+        (<TYPES> TypeDecls()|VarDeclSec()|SubProgramDecls())+
     }
 
     void TypeDecls():
