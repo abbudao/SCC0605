@@ -45,7 +45,7 @@ PARSER_END(Jason)
     TOKEN: {<THEN: "then">}
     TOKEN: {<ARRAY: "array">}
     TOKEN: {<EOL: ";">}
-    TOKEN: {<IDENTIFIER: (["a"-"z", "A"-"Z", "_"])+ (<NUM>)*>}
+    TOKEN: {<IDENTIFIER: ("_")* (["a"-"z", "A"-"Z", "_"])+ (<NUM>)*>}
     TOKEN: {<LBR: "[">}
     TOKEN: {<RBR: "]">}
     TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
@@ -73,7 +73,7 @@ PARSER_END(Jason)
     void Program():
     {}
     {
-    Header()[DeclSec()]Block()<EOF>
+    Header()[DeclSec()]Block()<POINT>
 
     }
 
@@ -85,7 +85,7 @@ PARSER_END(Jason)
     void Block():
     {}
     {
-        <BEGIN>Statements()<END>
+        <BEGIN>[Statements()]<END>
     }
     /*Declaracoes*/
     void DeclSec():
@@ -132,7 +132,7 @@ PARSER_END(Jason)
     void VarDecls():
     {}
     {
-        VarDecl() (VarDecl())*
+        VarDecl() ( VarDecl())*
     }
 
     void VarDecl():
@@ -150,7 +150,7 @@ PARSER_END(Jason)
     void IdList():
     {}
     {
-        (<IDENTIFIER>)* <IDENTIFIER>
+        (<IDENTIFIER> <COMA>)* <IDENTIFIER>
     }
 
     void SubProgramDecls():
