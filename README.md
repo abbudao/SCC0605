@@ -1,13 +1,15 @@
 # ARQUIVOS
 
-**jason.jj**: Arquivo que descreve os tokens e as produções.
+**jason.jj**: Arquivo de definição dos tokens e das produções
 
-**test.txt**: Arquivo que contém um programa para teste.
+**test.txt**: Arquivo que contém um programa para teste
 
-# USO
+# COMPILAÇÃO:
 
-**Construção das classes java**: javacc jason.jj
+javacc jason.jj
 
-**Compilação**: javac {aqui vão todos os arquivos .java}
+javac {Aqui vão todos os arquivos .java}
 
-**Teste**: cat test.txt | java Jason
+# TESTE:
+
+cat test.txt | java Jason
