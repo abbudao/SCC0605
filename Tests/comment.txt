@@ -1,10 +1,13 @@
-# first comment #
+# first comment 
 program PROGRAM_NAME ; 
-# comment #
-begin # front comment #
+# comment 
+/*block 
+coment*/
+begin # front comment 
 read ID_NAME
-# this_1S_
-A Comment #
-end .
+# this_1S_A Comment 
 
-# last comment #
+end .
+/*another block
+*/
+# last comment 
