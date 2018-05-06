@@ -1,0 +1,4 @@
+program PROGRAM_NAME ;
+variables ID_NAME1 VAR_NAME1, VAR_NAME2, VAR_NAME3 ;
+ID_NAME2 VAR_NAME4, VAR_NAME5; 
+begin end .

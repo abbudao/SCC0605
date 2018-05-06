@@ -1,0 +1,3 @@
+program PROGRAM_NAME ; 
+types TYPE_NAME array [10] ; 
+begin end .
