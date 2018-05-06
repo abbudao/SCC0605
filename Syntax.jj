@@ -65,7 +65,6 @@ PARSER_END(Jason)
     TOKEN: {<GOE: ">=">}
     TOKEN: {<LOE: "<=">}
     TOKEN: {<EQUAL: "=">}
-    TOKEN: {<EQUALS: "==">}
     TOKEN: {<COLON: ":">}
     TOKEN: {<COMA: ",">}
     TOKEN: {<AND: "&">}
@@ -278,12 +277,12 @@ PARSER_END(Jason)
     void Expression():
     {}
     {
-        Term() (MultOp() Unary())*
+        Term() (AddOp() Term())*
     }
     void Term():
     {}
     {
-        Unary() (MultOp() Factor())*
+        Unary() (MultOp() Unary())*
     }
 
     /*Expressoes*/
@@ -305,13 +304,13 @@ PARSER_END(Jason)
     void Variable():
     {}
     {
-        <IDENTIFIER> [<RBR> Expression() <LBR>]
-            (<POINT> <IDENTIFIER> [<RBR>Expression()<LBR>])*
+        <IDENTIFIER> [<LBR> Expression() <RBR>]
+            (<POINT> <IDENTIFIER> [<LBR>Expression()<RBR>])*
     }
     void RelOp():
     {}
     {
-        <EQUALS>
+        <EQUAL>
         | <EXCLAMATION>
         | <GREATERTHAN>
         | <LESSTHAN>
