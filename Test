@@ -1,0 +1,18 @@
+cd ./Tests
+
+i=0     # initialize the variable before the loop
+for m in *
+do
+    arr[$i]=$m
+    i=$((i + 1))
+done
+cd ..
+
+i=0
+for f in ${arr[*]}
+do
+    echo ${arr[$i]}
+    java Jason < Tests/${arr[$i]}
+    i=$((i + 1))
+    echo --------------- '\n'
+done

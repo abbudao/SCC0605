@@ -1,0 +1,3 @@
+program PROGRAM_NAME ;
+variables real VAR_NAME ;
+begin end .

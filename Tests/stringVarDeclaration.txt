@@ -1,0 +1,3 @@
+program PROGRAM_NAME ;
+variables string VAR_NAME ;
+begin end .
