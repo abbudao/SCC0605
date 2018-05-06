@@ -1,0 +1,6 @@
+program PROGRAM_NAME ; 
+begin 
+read ID_NAME1
+read ID_NAME2
+read ID_NAME3
+end .

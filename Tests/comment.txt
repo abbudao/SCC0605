@@ -1,0 +1,10 @@
+# first comment #
+program PROGRAM_NAME ; 
+# comment #
+begin # front comment #
+read ID_NAME
+# this_1S_
+A Comment #
+end .
+
+# last comment #

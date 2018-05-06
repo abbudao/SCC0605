@@ -1,0 +1,6 @@
+program PROGRAM_NAME ;
+function identifier ;
+begin read ID_NAME1 
+; return (ID_NAME2)
+end ;
+begin end .

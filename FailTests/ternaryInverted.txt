@@ -1,0 +1,4 @@
+program PROGRAM_NAME ; 
+begin 
+ID_NAME1 : ID_NAME2 ? ID_NAME3 
+end .

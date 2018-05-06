@@ -16,7 +16,7 @@ PARSER_END(Jason)
 
     SKIP: {<"#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>}
     SKIP: {" " | "\n" | "\r" | "\r\n" | "\t"}
-    TOKEN: {<NUM: (["0"-"9"])+ ["."] (["0"-"9"])*>}
+    TOKEN: {<NUM: (["0"-"9"])+|(["0"-"9"])+ ["."] (["0"-"9"])+>}
     TOKEN: {<PROGRAM: "program">}
     TOKEN: {<BEGIN: "begin">}
     TOKEN: {<END: "end">}
@@ -234,7 +234,7 @@ PARSER_END(Jason)
     void Condition_Exp():
     {}
     {
-        Condition()[<ASK> [Statements()] <COLON> [Statements()] ]
+        Condition()[<ASK> [Condition_Exp()] <COLON> [Condition_Exp()] ]
     }
     void ElseClause():
     {}

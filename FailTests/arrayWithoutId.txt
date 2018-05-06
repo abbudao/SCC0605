@@ -1,0 +1,3 @@
+program PROGRAM_NAME ; 
+types array real [10] ; 
+begin end .

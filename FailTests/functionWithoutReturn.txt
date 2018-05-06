@@ -1,0 +1,5 @@
+program PROGRAM_NAME ;
+function identifier returns real ;
+begin read ID_NAME1 ;
+end ;
+begin end .
