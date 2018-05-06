@@ -236,12 +236,12 @@ PARSER_END(Jason)
     void Condition_Exp():
     {}
     {
-        Condition()[<ASK> [Condition_Exp()] <COLON> [Condition_Exp()] ]
+        Condition()[<ASK> Condition_Exp() <COLON> Condition_Exp()] 
     }
     void ElseClause():
     {}
     {
-        [<ELSE>] [Statements()] <ENDIF>
+        [<ELSE> Statements()] <ENDIF>
     }
     void ReturnStatement():
     {}
