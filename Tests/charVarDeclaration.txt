@@ -1,3 +1,0 @@
-program PROGRAM_NAME ;
-variables char VAR_NAME ;
-begin end .

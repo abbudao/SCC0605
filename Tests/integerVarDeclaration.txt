@@ -1,3 +1,0 @@
-program PROGRAM_NAME ;
-variables integer VAR_NAME ;
-begin end .

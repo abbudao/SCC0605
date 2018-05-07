@@ -1,4 +1,0 @@
-program PROGRAM_NAME ;
-types TYPE_NAME record real ID_NAME;
-end ;  
-begin end .

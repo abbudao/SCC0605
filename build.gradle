@@ -1,0 +1,37 @@
+plugins {
+  id "ca.coglinc.javacc" version "2.4.0"
+  id "java"
+  id "application"
+}
+repositories {
+    mavenCentral()
+}
+dependencies {
+	testCompile('org.junit.jupiter:junit-jupiter-api:5.2.0')
+	testCompile('org.junit.jupiter:junit-jupiter-params:5.2.0')
+	testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
+}
+
+test {
+	useJUnitPlatform()
+
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
+
+	reports {
+		html.enabled = true
+	}
+}
+
+task wrapper(type: Wrapper) {
+	description = 'Generates gradlew[.bat] scripts'
+	gradleVersion = '4.6'
+}
+
+mainClassName="Jason"
+// dependencies {
+//     implementation 'org.hibernate:hibernate-core:3.6.7.Final'
+//     api 'com.google.guava:guava:23.0'
+//     testImplementation 'junit:junit:4.+'
+// }

@@ -1,2 +1,5 @@
 *java
 *class
+build/
+.gradle/*
+.idea/*

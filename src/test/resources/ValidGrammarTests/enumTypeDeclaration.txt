@@ -1,0 +1,3 @@
+program PROGRAM_NAME ; 
+types TYPE_NAME enum ID_NAME = 10 ; 
+begin end .

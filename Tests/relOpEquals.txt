@@ -1,4 +1,0 @@
-program PROGRAM_NAME ;
-begin
-if ID_NAME1 = ID_NAME2 then read ID_NAME2 endif
-end .
