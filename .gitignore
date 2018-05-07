@@ -1,5 +1,7 @@
 *java
 *class
 build/
-.gradle/*
+*.gradle/*
+src/.gradle/*
 .idea/*
+
