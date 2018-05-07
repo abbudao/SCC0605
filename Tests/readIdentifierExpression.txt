@@ -1,4 +1,0 @@
-program PROGRAM_NAME ;
-begin
-read ID_NAME1 [ID_NAME2]
-end .

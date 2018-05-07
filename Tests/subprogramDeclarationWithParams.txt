@@ -1,3 +1,0 @@
-program PROGRAM_NAME ;
-procedure ID_NAME ; parameters var real ID_NAME ; begin end ;
-begin end .

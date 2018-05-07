@@ -1,4 +1,0 @@
-program PROGRAM_NAME ; 
-begin 
-ID_NAME1 * ID_NAME2 ? ID_NAME3 ? ID_NAME4 : ID_NAME5 : ID_NAME6 + ID_NAME7
-end .

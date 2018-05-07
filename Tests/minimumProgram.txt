@@ -1,2 +1,0 @@
-program PROGRAM_NAME ;
-begin end .

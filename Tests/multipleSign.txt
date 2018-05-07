@@ -1,4 +1,0 @@
-program PROGRAM_NAME ; 
-begin 
-set ID_NAME = -+-+++++---- 10
-end .

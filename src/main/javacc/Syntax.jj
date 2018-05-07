@@ -1,0 +1,436 @@
+options{
+    LOOKAHEAD = 2;
+    STATIC = false ;
+}
+PARSER_BEGIN(Jason)
+    import java.io.File;
+    import java.io.FileInputStream;
+    import java.io.InputStream;
+    import java.io.IOException;
+    import java.io.FileWriter;
+    class Jason{
+        public static void main(String[] args)
+            throws ParseException, TokenMgrError, IOException{
+                String file;
+                if (args.length == 1) file = args [0];
+                else file = "";
+                InputStream input = System.in;
+                try
+                {
+                    input = new FileInputStream(new File(file));
+                }
+                catch (IOException e)
+                {
+                    System.out.println("Use stdin, pressione CTRL+D (Linux and Mac) / CTRL+Z (Windows) para terminar o input.");
+                }
+                finally{
+                    try
+                    {
+                        Jason parser = new Jason(input);
+                        parser.Program();
+                        System.out.println("Finished Parsing!");
+                    }
+                    catch(ParseException e)
+                    {
+                        System.err.println("Parsing error");
+                        throw new IOException();
+                    }
+                }
+            }
+    }
+PARSER_END(Jason)
+
+    SKIP: {<"#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>}
+SKIP: {" " | "\n" | "\r" | "\r\n" | "\t"}
+TOKEN: {<NUM: (["0"-"9"])+|(["0"-"9"])+ ["."] (["0"-"9"])+>}
+TOKEN: {<PROGRAM: "program">}
+TOKEN: {<BEGIN: "begin">}
+TOKEN: {<END: "end">}
+TOKEN: {<READ: "read">}
+TOKEN: {<WRITE: "write">}
+TOKEN: {<IF: "if">}
+TOKEN: {<SET: "set">}
+TOKEN: {<ENDIF: "endif">}
+TOKEN: {<ELSE: "else">}
+TOKEN: {<DO: "do">}
+TOKEN: {<WHILE: "while">}
+TOKEN: {<ENDWHILE: "endwhile">}
+TOKEN: {<UNTIL: "until">}
+TOKEN: {<ENDUNTIL: "enduntil">}
+TOKEN: {<CALL: "call">}
+TOKEN: {<RECORD: "record">}
+TOKEN: {<TYPES: "types">}
+TOKEN: {<VARIABLES: "variables">}
+TOKEN: {<REAL: "real">}
+TOKEN: {<INT: "integer">}
+TOKEN: {<PROC: "procedure">}
+TOKEN: {<PARAM: "parameters">}
+TOKEN: {<VAR: "var">}
+TOKEN: {<FUNCTION: "function">}
+TOKEN: {<RETURNS: "returns">}
+TOKEN: {<RETURN: "return">}
+TOKEN: {<THEN: "then">}
+TOKEN: {<ARRAY: "array">}
+TOKEN: {<EOL: ";">}
+TOKEN: {<IDENTIFIER: ("_")* (["a"-"z", "A"-"Z", "_"])+ (<NUM>)*>}
+TOKEN: {<LBR: "[">}
+TOKEN: {<RBR: "]">}
+TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
+TOKEN: {<LP: "(">}
+TOKEN: {<RP: ")">}
+TOKEN: {<SLASH: "\\">}
+TOKEN: {<TIL: "~">}
+TOKEN: {<PLUS: "+">}
+TOKEN: {<LESS: "-">}
+TOKEN: {<TIMES: "*">}
+TOKEN: {<LESSTHAN: "<">}
+TOKEN: {<GREATERTHAN: ">">}
+TOKEN: {<EXCLAMATION: "!">}
+TOKEN: {<POINT: ".">}
+TOKEN: {<ASK: "?">}
+TOKEN: {<GOE: ">=">}
+TOKEN: {<LOE: "<=">}
+TOKEN: {<EQUAL: "=">}
+TOKEN: {<COLON: ":">}
+TOKEN: {<COMA: ",">}
+TOKEN: {<AND: "&">}
+TOKEN: {<DIV: "/">}
+/*Programa e Bloco*/
+void Program():
+{}
+{
+    Header() DeclSec() Block()<POINT>
+
+}
+
+void Header():
+{}
+{
+    <PROGRAM><IDENTIFIER><EOL>
+}
+void Block():
+{}
+{
+    <BEGIN>[Statements()]<END>
+}
+/*Declaracoes*/
+void DeclSec():
+{}
+{
+    [<TYPES> TypeDecls()|VarDeclSec()|SubProgramDecls()]
+}
+
+void TypeDecls():
+{}
+{
+    (TypeDecl())*
+}
+void TypeDecl():
+{}
+{
+    <IDENTIFIER> TypeSpecification()
+}
+void TypeSpecification():
+{}
+{
+    ArraySpecification()
+        | RecordSpecification()
+}
+void ArraySpecification():
+{}
+{
+    <ARRAY> DataType() <LBR> <NUM> <RBR> <EOL>
+}
+
+void RecordSpecification():
+{}
+{
+    <RECORD> VarDecls() <END> <EOL>
+}
+
+void VarDeclSec():
+{}
+{
+    <VARIABLES> VarDecls()
+}
+
+void VarDecls():
+{}
+{
+    VarDecl() ( VarDecl())*
+}
+
+void VarDecl():
+{}
+{
+    DataType() IdList() <EOL>
+}
+
+void DataType():
+{}
+{
+    (<REAL>|<INT>|<IDENTIFIER>|<STRING>)
+}
+
+void IdList():
+{}
+{
+    (<IDENTIFIER> <COMA>)* <IDENTIFIER>
+}
+
+void SubProgramDecls():
+{}
+{
+    SubProgramDecl() (SubProgramDecl())*
+}
+void SubProgramDecl():
+{}
+{
+    ProcDecl() | FunctionDecl()
+}
+void ProcDecl():
+{}
+{
+    ProcHeader() SubProgramDeclSec() Block() <EOL>
+}
+
+void ProcHeader():
+{}
+{
+    <PROC><IDENTIFIER><EOL>
+}
+void SubProgramDeclSec():
+{}
+{
+    [ParamDeclSec()] DeclSec()
+}
+void ParamDeclSec():
+{}
+{
+    <PARAM> ParamDecls()
+}
+
+void ParamDecls():
+{}
+{
+    ParamDecl() (ParamDecls())*
+}
+
+void ParamDecl():
+{}
+{
+    [<VAR>] DataType() <IDENTIFIER> <EOL>
+}
+
+void FunctionDecl():
+{}
+{
+    FunctionHeader() SubProgramDeclSec() FunctionBlock() <EOL>
+}
+
+void FunctionHeader():
+{}
+{
+    <FUNCTION> <IDENTIFIER> <RETURNS> DataType() <EOL>
+}
+
+void FunctionBlock():
+{}
+{
+    <BEGIN> [Statements()] ReturnStatement() <END>
+}
+/* Comandos */
+void Statements():
+{}
+{
+    Statement() (<EOL>Statement())*
+}
+
+void Statement():
+{}
+{
+    (<READ> | <WRITE>) Variable()
+        | <SET> Variable() <EQUAL> Expression()
+        | <IF> Condition_Exp() <THEN> Statements() ElseClause()
+        | <WHILE> Condition_Exp() <DO> [Statements()] <ENDWHILE>
+        | <UNTIL> Condition_Exp() <DO> [Statements()] <ENDUNTIL>
+        | <CALL> <IDENTIFIER> [ArgList()]
+        | Condition_Exp()
+}
+void Condition_Exp():
+{}
+{
+    Condition()[<ASK> [Condition_Exp()] <COLON> [Condition_Exp()] ]
+}
+void ElseClause():
+{}
+{
+    [<ELSE>] [Statements()] <ENDIF>
+}
+void ReturnStatement():
+{}
+{
+    <EOL> <RETURN><LP>Condition_Exp()<RP>
+}
+
+void ArgList():
+{}
+{
+    <LP> [Arguments()] <RP>
+}
+
+void Arguments():
+{}
+{
+    (Condition_Exp() <COMA>)* Condition_Exp()
+}
+void Condition():
+{}
+{
+    CompoundCondition() (<SLASH>CompoundCondition())*
+}
+
+void CompoundCondition():
+{}
+{
+    SimpleCondition() (<AND> SimpleCondition())*
+}
+void SimpleCondition():
+{}
+{
+    Expression() (RelOp() Expression())*
+}
+void Expression():
+{}
+{
+    Term() (AddOp() Term())*
+}
+void Term():
+{}
+{
+    Unary() (MultOp() Unary())*
+}
+
+/*Expressoes*/
+void Unary():
+{}
+{
+    (<PLUS>|<LESS>) Unary()
+        | Factor()
+}
+void Factor():
+{}
+{
+    [<TIL>] (Variable()
+            | <NUM>
+            | <STRING>
+            | <LP> Condition_Exp() <RP>
+            | <IDENTIFIER> ArgList() )
+}
+void Variable():
+{}
+{
+    <IDENTIFIER> [<LBR> Expression() <RBR>]
+        (<POINT> <IDENTIFIER> [<LBR>Expression()<RBR>])*
+}
+void RelOp():
+{}
+{
+    <EQUAL>
+        | <EXCLAMATION>
+        | <GREATERTHAN>
+        | <LESSTHAN>
+        | <LOE>
+        | <GOE>
+}
+void AddOp():
+{}
+{
+    <PLUS>
+        | <LESS>
+}
+void MultOp():
+{}
+{
+    <TIMES> | <DIV>
+}
+/*
+   hProgrami ::= hHeader i [hDeclSeci] hBlocki ‘.’ (1)
+   hHeader i ::= ‘program’ identifier ‘;’ (2)
+   hBlocki ::= ‘begin’ [hStatementsi] ‘end’ (3)
+   16
+   hDeclSeci ::= types hTypeDeclsi ( hVarDeclSecihSubProgramDeclsi (4)
+   | hSubProgramDeclsi (5)
+   | hVarDeclSeci (6)
+   | λ) (7)
+   | [hVarDeclSeci] hSubProgramDeclsi (8)
+   hTypeDeclsi ::= {hTypeDecli} (9)
+   hTypeDecli ::= identifier hTypeSpecificationi (10)
+   hTypeSpecificationi ::= hArraySpecificationi (11)
+   | hRecordSpecificationi (12)
+   hArraySpecificationi ::= array hDataTypei ‘[’numericliteral‘]’ ‘;’ (13)
+   hRecordSpecificationi ::= record hVarDeclsi end; (14)
+   hVarDeclSeci ::= variables hVarDeclsi (15)
+   hVarDeclsi ::= {hVarDeclsi} hVarDecli (16)
+   hVarDecli ::= hDataTypei hIdListi‘;’ (17)
+   hDataTypei ::= real (18)
+   | integer (19)
+   | identifier (20)
+   | string (21)
+   hIdListi ::= {identifier ‘,’} identifier (22)
+   hSubProgramDeclsi ::= [hSubProgramDeclsi]hSubProgramDecli (23)
+   hSubProgramDecli ::= hProcDecli (24)
+   | hFunctionDecli (25)
+   hProcDecli ::= hProcHeader i hSubProgramDeclSeci hBlocki‘;’ (26)
+   hProcHeader i ::= procedure identifier ‘;’ (27)
+   hSubProgramDeclSeci ::= [hParamDeclSeci] hDeclSeci (28)
+   Grupo de regras 5 Declara¸c˜oes (EBNF)
+   hParamDeclSeci ::= parameters hParamDeclsi (29)
+   hParamDeclsi ::= [hParamDeclsi]hParamDecli (30)
+   hParamDecli ::= [var]hDataTypei identifier ‘;’ (31)
+   17
+   hFunctionDecli ::= hFunctionHeader i hSubProgramDeclSeci (32)
+   hFunctionBlocki ‘;’
+   hFunctionHeader i ::= function returns hDatatypei ‘;’ (33)
+   hFunctionBlocki ::= begin [hStatementsi] hReturnStatementi end (34)
+   hStatementsi ::= { hStatementsi ‘;’} hStatementi (35)
+   hStatementi ::= (read | write) hVariablei (36)
+   | set hVariablei = hExpressioni (37)
+   | if hConditioni then [hStatementsi] hElseClausei (38)
+   | while hConditioni do [hStatementsi] endwhile (39)
+   | until hConditioni do [hStatementsi] enduntil (40)
+   | call identifier [hArgListi] (41)
+   | hTernaryi (42)
+   hTernaryi ::= hConditioni?[hStatementsi]:[hStatementsi] (43)
+   hElseClausei ::= [else] [hStatementsi] endif (44)
+   hReturnStatementi ::= ‘;’ return ‘(’ hConditioni ‘)’ (45)
+   hArgListi ::= ‘(’ hArgumentsi ‘)’ (46)
+   hArgumentsi ::= {hConditioni ‘,’} hConditioni (47)
+   hConditioni ::= {hCompoundConditioni \ } hCompoundConditioni (48)
+   hCompoundConditioni ::= {hSimpleConditioni (49)
+   ’&’} hSimpleConditioni
+   hSimpleConditioni ::= {hExpressioni hRelOpi} hExpressioni (50)
+   hExpressioni ::= {hTermi hAddOpi} hTermi (51)
+   hTermi ::= hUnaryi {hMultOpi hFactor i} (52)
+   Grupo de regras 6 Express˜oes (EBNF)
+   hUnaryi ::= {(‘+’ | ‘-’)} hFactor i (53)
+   hFactor i ::= [ ˜] (hVariablei (54)
+   | numericliteral (55)
+   | stringliteral (56)
+   | ‘(’hConditioni‘)’ (57)
+   | identifier hArglisti (58)
+   | hTernaryi) (59)
+   18
+   hVariablei ::= identifier [‘[’ hExpressioni ‘]’] (60)
+   {.identifier [‘[’ hExpressioni ‘]’]}
+   hRelOpi ::= ‘==’ (61)
+   | ‘!’ (62)
+    | ‘>’ (63)
+    | ‘<’ (64)
+    | ‘<=’ (65)
+    | ‘>=’ (66)
+    hAddOpi ::= ‘+’ (67)
+| ‘-’ (68)
+    hMultOpi ::= ‘*’
+
+    */
