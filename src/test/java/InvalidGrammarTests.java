@@ -23,7 +23,7 @@ public class InvalidGrammarTests{
         }
         catch (IOException e)
         {
-            System.out.println("File not found");
+            System.out.println(e.getMessage());
         }
         boolean encounteredException = false;
         try{
@@ -32,10 +32,15 @@ public class InvalidGrammarTests{
         }
         catch(ParseException e){
             encounteredException= true;
+            System.out.println(e.getMessage());
+        }
+        catch(TokenMgrError e){
+            encounteredException = true;
+            System.out.println(e.getMessage());
         }
         finally{
             if(!encounteredException){
-                fail();
+                fail("No exception found");
             }
         }
     }

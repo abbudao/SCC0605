@@ -1,6 +1,7 @@
 options{
     LOOKAHEAD = 2;
     STATIC = false ;
+    ERROR_REPORT= false;
 }
 PARSER_BEGIN(Jason)
     import java.io.File;
@@ -21,7 +22,8 @@ PARSER_BEGIN(Jason)
                 }
                 catch (IOException e)
                 {
-                    System.out.println("Use stdin, pressione CTRL+D (Linux and Mac) / CTRL+Z (Windows) para terminar o input.");
+                    System.out.println(e.getMessage());
+                    return;
                 }
                 finally{
                     try
@@ -32,7 +34,9 @@ PARSER_BEGIN(Jason)
                     }
                     catch(ParseException e)
                     {
-                        System.err.println("Parsing error");
+                        System.out.println(e.getMessage());
+                        System.out.println("Unknown symbol >> "+ e.currentToken.image +
+                                " << Line:" + e.currentToken.beginLine+", column:" + e.currentToken.beginColumn);
                         throw new IOException();
                     }
                 }

@@ -31,8 +31,14 @@ public class ValidGrammarTests{
             parserInstance.Program();
         }
         catch(ParseException e){
-            fail();
+            String error = "\n*****ParseExeception encountered!****\n";
+            fail(error+e.getMessage());
         }
+        catch(TokenMgrError e){
+            String error = "\n****TokenMgr Error encounterd!*****\n";
+            fail(e.getMessage());
+        }
+        
     }
 
     private static List<String> listTestFiles(){

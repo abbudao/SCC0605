@@ -11,6 +11,11 @@ dependencies {
 	testCompile('org.junit.jupiter:junit-jupiter-params:5.2.0')
 	testRuntime('org.junit.jupiter:junit-jupiter-engine:5.2.0')
 }
+run {
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
 
 test {
 	useJUnitPlatform()
