@@ -1,19 +1,19 @@
-# ARQUIVOS
+# Introdução 
+Repositório para a construção de um parser da linguagem Jason da disciplina SCC605
 
-**jason.jj**: Arquivo de definição dos tokens e das produções
+# Como reproduzir
+## Requisitos
+Java 8+
+## Instale o Gradle
+### Arch-linux 
+`sudo pacman -S gradle`
 
-**test.txt**: Arquivo que contém um programa para teste
+# Building 
+Na pasta raiz do projeto:
+`gradle build`
 
-# COMPILAÇÃO:
+# Testing 
+Na pasta raiz do projeto:
+`gradle test`
 
-javacc jason.jj
-
-javac {Aqui vão todos os arquivos .java}
-
-# TESTE:
-
-cat test.txt | java Jason
-
-OU
-
-java Jason < test.txt
+*Um report em html estará disponível após esse comando*
