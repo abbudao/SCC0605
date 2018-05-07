@@ -1,4 +1,0 @@
-program PROGRAM_NAME ; 
-begin # comment not closed 
-read ID_NAME
-end .
