@@ -1,3 +1,3 @@
-program PROGRAM_NAME ; 
-variables ID_NAME VAR_NAME;
+program PROGRAM_NAME ;
+variables ID_NAME VAR_NAME ;
 begin end .

@@ -1,6 +1,6 @@
 program PROGRAM_NAME ;
 function identifier returns real ;
-begin read ID_NAME1 
+begin read ID_NAME1
 ; return (ID_NAME2)
-end  
+end;
 begin end .
