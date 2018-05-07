@@ -44,7 +44,9 @@ PARSER_BEGIN(Jason)
     }
 PARSER_END(Jason)
 
-    SKIP: {<"#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>}
+
+SKIP: {<"#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>}
+SKIP: {<"/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/">}
 SKIP: {" " | "\n" | "\r" | "\r\n" | "\t"}
 TOKEN: {<NUM: (["0"-"9"])+|(["0"-"9"])+ ["."] (["0"-"9"])+>}
 TOKEN: {<PROGRAM: "program">}
@@ -76,7 +78,7 @@ TOKEN: {<RETURN: "return">}
 TOKEN: {<THEN: "then">}
 TOKEN: {<ARRAY: "array">}
 TOKEN: {<EOL: ";">}
-TOKEN: {<IDENTIFIER: ("_")* (["a"-"z", "A"-"Z", "_"])+ (<NUM>)*>}
+TOKEN: {<IDENTIFIER: (["a"-"z", "A"-"Z", "_"])+ (<NUM>)*>}
 TOKEN: {<LBR: "[">}
 TOKEN: {<RBR: "]">}
 TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
@@ -127,7 +129,7 @@ void DeclSec():
 void TypeDecls():
 {}
 {
-    (TypeDecl())*
+    (TypeDecl())+
 }
 void TypeDecl():
 {}
@@ -264,12 +266,12 @@ void Statement():
 void Condition_Exp():
 {}
 {
-    Condition()[<ASK> [Condition_Exp()] <COLON> [Condition_Exp()] ]
+    Condition()[<ASK> Condition_Exp() <COLON> Condition_Exp()] 
 }
 void ElseClause():
 {}
 {
-    [<ELSE>] [Statements()] <ENDIF>
+    [<ELSE> Statements()] <ENDIF>
 }
 void ReturnStatement():
 {}
@@ -358,83 +360,3 @@ void MultOp():
 {
     <TIMES> | <DIV>
 }
-/*
-   hProgrami ::= hHeader i [hDeclSeci] hBlocki ‘.’ (1)
-   hHeader i ::= ‘program’ identifier ‘;’ (2)
-   hBlocki ::= ‘begin’ [hStatementsi] ‘end’ (3)
-   16
-   hDeclSeci ::= types hTypeDeclsi ( hVarDeclSecihSubProgramDeclsi (4)
-   | hSubProgramDeclsi (5)
-   | hVarDeclSeci (6)
-   | λ) (7)
-   | [hVarDeclSeci] hSubProgramDeclsi (8)
-   hTypeDeclsi ::= {hTypeDecli} (9)
-   hTypeDecli ::= identifier hTypeSpecificationi (10)
-   hTypeSpecificationi ::= hArraySpecificationi (11)
-   | hRecordSpecificationi (12)
-   hArraySpecificationi ::= array hDataTypei ‘[’numericliteral‘]’ ‘;’ (13)
-   hRecordSpecificationi ::= record hVarDeclsi end; (14)
-   hVarDeclSeci ::= variables hVarDeclsi (15)
-   hVarDeclsi ::= {hVarDeclsi} hVarDecli (16)
-   hVarDecli ::= hDataTypei hIdListi‘;’ (17)
-   hDataTypei ::= real (18)
-   | integer (19)
-   | identifier (20)
-   | string (21)
-   hIdListi ::= {identifier ‘,’} identifier (22)
-   hSubProgramDeclsi ::= [hSubProgramDeclsi]hSubProgramDecli (23)
-   hSubProgramDecli ::= hProcDecli (24)
-   | hFunctionDecli (25)
-   hProcDecli ::= hProcHeader i hSubProgramDeclSeci hBlocki‘;’ (26)
-   hProcHeader i ::= procedure identifier ‘;’ (27)
-   hSubProgramDeclSeci ::= [hParamDeclSeci] hDeclSeci (28)
-   Grupo de regras 5 Declara¸c˜oes (EBNF)
-   hParamDeclSeci ::= parameters hParamDeclsi (29)
-   hParamDeclsi ::= [hParamDeclsi]hParamDecli (30)
-   hParamDecli ::= [var]hDataTypei identifier ‘;’ (31)
-   17
-   hFunctionDecli ::= hFunctionHeader i hSubProgramDeclSeci (32)
-   hFunctionBlocki ‘;’
-   hFunctionHeader i ::= function returns hDatatypei ‘;’ (33)
-   hFunctionBlocki ::= begin [hStatementsi] hReturnStatementi end (34)
-   hStatementsi ::= { hStatementsi ‘;’} hStatementi (35)
-   hStatementi ::= (read | write) hVariablei (36)
-   | set hVariablei = hExpressioni (37)
-   | if hConditioni then [hStatementsi] hElseClausei (38)
-   | while hConditioni do [hStatementsi] endwhile (39)
-   | until hConditioni do [hStatementsi] enduntil (40)
-   | call identifier [hArgListi] (41)
-   | hTernaryi (42)
-   hTernaryi ::= hConditioni?[hStatementsi]:[hStatementsi] (43)
-   hElseClausei ::= [else] [hStatementsi] endif (44)
-   hReturnStatementi ::= ‘;’ return ‘(’ hConditioni ‘)’ (45)
-   hArgListi ::= ‘(’ hArgumentsi ‘)’ (46)
-   hArgumentsi ::= {hConditioni ‘,’} hConditioni (47)
-   hConditioni ::= {hCompoundConditioni \ } hCompoundConditioni (48)
-   hCompoundConditioni ::= {hSimpleConditioni (49)
-   ’&’} hSimpleConditioni
-   hSimpleConditioni ::= {hExpressioni hRelOpi} hExpressioni (50)
-   hExpressioni ::= {hTermi hAddOpi} hTermi (51)
-   hTermi ::= hUnaryi {hMultOpi hFactor i} (52)
-   Grupo de regras 6 Express˜oes (EBNF)
-   hUnaryi ::= {(‘+’ | ‘-’)} hFactor i (53)
-   hFactor i ::= [ ˜] (hVariablei (54)
-   | numericliteral (55)
-   | stringliteral (56)
-   | ‘(’hConditioni‘)’ (57)
-   | identifier hArglisti (58)
-   | hTernaryi) (59)
-   18
-   hVariablei ::= identifier [‘[’ hExpressioni ‘]’] (60)
-   {.identifier [‘[’ hExpressioni ‘]’]}
-   hRelOpi ::= ‘==’ (61)
-   | ‘!’ (62)
-    | ‘>’ (63)
-    | ‘<’ (64)
-    | ‘<=’ (65)
-    | ‘>=’ (66)
-    hAddOpi ::= ‘+’ (67)
-| ‘-’ (68)
-    hMultOpi ::= ‘*’
-
-    */
