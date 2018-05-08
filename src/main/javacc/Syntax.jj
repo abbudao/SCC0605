@@ -34,8 +34,6 @@ PARSER_BEGIN(Jason)
                     catch(ParseException e)
                     {
                         System.out.println(e.getMessage());
-                        System.out.println("Símbolo desconhecido >> "+ e.currentToken.image +
-                                " << Linha:" + e.currentToken.beginLine+", Coluna:" + e.currentToken.beginColumn);
                     }
                 }
             }
