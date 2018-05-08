@@ -1,0 +1,100 @@
+\ProvidesPackage{DocumentStyle}
+%Define colorscheme
+\definecolor{darkest}{RGB}{20,42,61}
+\definecolor{dark}{RGB}{0,100,148}
+\definecolor{primary}{RGB}{37,124,161}
+\definecolor{bright}{RGB}{27,152,224}
+\definecolor{brightest}{RGB}{232,241,242}
+\definecolor{commentcolor}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{stringcolor}{rgb}{0.58,0,0.82}
+\makeatletter
+% add tcblistings to \jobname.lol (list of listings)
+\tcbset{
+  addtogos/.style={list entry={\kvtcb@title},add to list={gos}{subsection}},
+  }
+\makeatother
+
+\makeatletter
+% add tcblistings to \jobname.lol (list of listings)
+\tcbset{
+  addtogod/.style={list entry={\kvtcb@title},add to list={god}{subsection}},
+  }
+\makeatother
+
+
+%Defining custom environments 
+\newtcolorbox[auto counter]{rulegroup}[1][]{enhanced,breakable,colframe=primary,colbacktitle=bright,colback=bright!10,title=Grupo de regras~\thetcbcounter \hfill #1 ,fonttitle=\bfseries, addtogos}
+\newtcolorbox[auto counter]{derivationgroup}[1][]{enhanced,breakable,colframe=dark,colbacktitle=primary,colback=bright!15,title=Derivação~\thetcbcounter \hfill #1,fonttitle=\bfseries,addtogod}
+\newtcolorbox[auto counter]{symbolgroup}[1][]{enhanced,breakable,colframe=darkest,colbacktitle=dark,colback=brightest!15,title=Grupo de símbolos~\thetcbcounter \hfill #1,fonttitle=\bfseries, addtogos}
+\newenvironment{rules}[1][]
+{\begin{rulegroup}[#1]}
+  {   \end{rulegroup} }
+\newenvironment{derivations}[1][]
+{\begin{derivationgroup}[#1]}
+  {   \end{derivationgroup} }
+\newenvironment{symbols}[1][]
+{\begin{symbolgroup}[#1]}
+  {   \end{symbolgroup} }
+
+
+
+\lstdefinelanguage{Jason}
+{
+  % list of keywords
+  morekeywords={
+    program,
+    begin,
+    end,
+    type,
+    types,
+    variables,
+    array,
+    record,
+    set,
+    real,
+    integer,
+    identifier,
+    string,
+    var,
+    function,
+    returns,
+    read,
+    set,
+    write,
+    call,
+    if,
+    then,
+    while,
+    endwhile,
+    until,
+    enduntil,
+    else,
+    endif,
+    return,
+  },
+  sensitive=false, % keywords are not case-sensitive
+  morecomment=[l]{//}, % l is for line comment
+  morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+  morestring=[b]" % defines that strings are enclosed in double quotes
+}
+
+\lstset{frame=tb,
+  language=Jason,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{commentcolor},
+  stringstyle=\color{stringcolor},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+\renewcommand{\lstlistingname}{Programa}
+\newcommand{\produce}[1]{$\xRightarrow{#1}$}
+

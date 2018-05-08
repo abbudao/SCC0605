@@ -1,0 +1,102 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=3cm]{geometry} %for margin
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage[portuguese]{babel}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{mathtools}
+\usepackage{syntax}
+\usepackage{cite}
+\usepackage{listings}
+
+\usepackage{etoolbox} % for patching
+\input{./mymacros}
+\usepackage{DocumentStyle}
+
+\title{Compiladores - Entrega 1}
+
+\begin{document}
+\input{./cover}
+\tableofcontents
+\clearpage
+
+\section{Introdução}
+	Neste trabalho, foi implementado um \textit{parser} para a linguagem Jason, utilizando a ferramenta JavaCC. Nele, definiram-se as regras da linguagem, com a notação EBNF (\textit{Extended Backus–Naur Form}), e os \textit{tokens} da mesma, a serem gerados pelo \textit{parser}.
+    
+    Além disso, foram desenvolvidos casos de teste para diversas funcionalidades da linguagem, utilizando o \textit{framework} de teste JUnit para executar todos os testes, apoiado na \emph{Build Tool} chamada \emph{Gradle}. Os testes foram dividos em testes que deveriam ser aceitos pelo \emph{parser} e testes onde o \emph{parser} deveria gerar erros.
+    
+\section{Questões}
+%acho q seria interessante formatar melhor esse texto
+	Antes de iniciar a construção do analisador léxico, algumas decisões de projeto devem ser tomadas. Com este propósito, propôs-se perguntas a serem respondidas sobre a linguagem:
+    \begin{enumerate}
+      \item A linguagem permite comentário dentro de comentário? São sensíveis à linha? Qual o marcador de comentário?
+      	
+        Resposta: A linguagem não permite comentários dentro de comentário, sendo que o comentários são sensíveis à linha e possuem como marcador o símbolo '\#'. 
+        
+      \item Os identificadores e as palavras-reservadas serão \textit{case-sensitive}? Ou seja, haverá diferenciação entre letras minúsculas e maiúsculas?
+      
+      Resposta: Sim, os identificadores e as palavras reservadas serão \textit{case-sensitive}.
+      
+      \item Os identificadores terão tamanho máximo de caracteres? Se não, há número de caracteres para diferenciação? 
+      
+      Resposta:Os identificadores não terão um tamanho máximo de caracteres e não haverá número de caracteres para diferenciação.
+      
+      \item Conjunto de palavras reservadas:
+      
+            \begin{symbols}[Palavras-Chave da linguagem]
+        \begin{align*}\
+          \mathtt{V_t} = \big(\lit{begin}, \lit{end}, \lit{program}, \lit{types}, \lit{array}, \lit{record},
+          \lit{variables},\\ \lit{real}, \lit{integer}, \lit{string}, \lit{procedure},
+          \lit{parameters}, \lit{var}, \\\lit{function}, \lit{returns}, \lit{read}, \lit{set}, \lit{write}, \lit{if}, 					\lit{then},
+          \lit{while},\\ \lit{do}, \lit{endwhile}, \lit{untill}, \lit{enduntil}, \lit{call}, \lit{else},
+        \lit{endif}, \lit{return}\big)
+      \end{align*}
+      \end{symbols}
+      
+      \item  Constantes permitidas: real, integer e string.
+      
+      \item Caracteres não imprimíveis e símbolos especiais: a linguagem não os aceita.
+    \end{enumerate}
+\section{Utilzando e construindo a aplicação}
+\subsection{Rodando o Parser}
+Utilize o arquivo \emph{.jar} fornecido, ou construído nas subseções seguintes, da seguinte forma:
+\begin{lstlisting}[language=bash,caption={Executando o Parser}]
+#!/bin/bash
+java -jar nomeDoJar.jar
+\end{lstlisting}
+O programa espera como entrada um caminho para um arquivo ou caso não haja argumento de entrada, este rodará iterativamente pelo \emph{STDIN} (\emph{standart input}). Como definido no projeto, caso aconteça algum erro, o parser parará imediatamente e informará qual era \emph{Token} esperada e qual foi a \emph{Token} recebida.
+
+\subsection{Construindo o Parser}
+Pode-se construir o \emph{Parser} através dos códigos fontes. Para isto algumas dependências são necessárias:
+\begin{itemize}
+\item Certifique-se de ter o Java Development Kit 8 ou superior instalado. Caso não o tenha, \href{https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html}{siga estes passos} ou utilze seu gerenciador de pacotes.
+\item Instale o Gradle para automatização da \emph{build}. Encontre os passos para \href{https://gradle.org/install/}{sua distribuição aqui}. Alternativamente, use seu gerenciador de pacotes.
+\end{itemize}
+Descompacte os arquivos fontes do zip ou clone o repositório:
+\begin{lstlisting}[language=bash,caption={Obtendo os arquivos fontes}]
+#!/bin/bash
+git clone https://github.com/abbudao/SCC0605 
+\end{lstlisting}
+Na pasta raiz do projeto, construa uma \emph{build}:
+\begin{lstlisting}[language=bash,caption={Construção automatizada}]
+#!/bin/bash
+gradle build
+\end{lstlisting}
+Os arquivos gerados pelo \emph{JavaCC} estarão no caminho \emph{``build/generated''}
+ e o jar automaticamente gerado no caminho \emph{``build/libs''}. Para a construção a suíte de testes já foi rodada e um report detalhado pode ser encontrado em \emph{``build/reports''}.
+ 
+\subsection{Testes}
+Para executar-se os testes, o segundo comando pode ser usado:
+\begin{lstlisting}[language=bash,caption={Rodando a suíte de testes}]
+#!/bin/bash
+gradle test 
+\end{lstlisting}
+O resultado da suite será mostrado no \emph{STDOUT} e um resultado detalhado também pode ser encontrado
+em \emph{``build/reports''}.
+\end{document}
+
+
+
+
+
