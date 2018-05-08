@@ -1,7 +1,7 @@
 options{
     LOOKAHEAD = 2;
     STATIC = false ;
-    ERROR_REPORT= false;
+    ERROR_REPORTING = true;
 }
 PARSER_BEGIN(Jason)
     import java.io.File;
@@ -22,22 +22,20 @@ PARSER_BEGIN(Jason)
                 }
                 catch (IOException e)
                 {
-                    System.out.println(e.getMessage());
-                    return;
+                System.out.println("Rodando pelo STDIN (Arquivo não encontrado ou não especificado)");
                 }
                 finally{
                     try
                     {
                         Jason parser = new Jason(input);
                         parser.Program();
-                        System.out.println("Finished Parsing!");
+                        System.out.println("Parsing finalizado sem erros!");
                     }
                     catch(ParseException e)
                     {
                         System.out.println(e.getMessage());
-                        System.out.println("Unknown symbol >> "+ e.currentToken.image +
-                                " << Line:" + e.currentToken.beginLine+", column:" + e.currentToken.beginColumn);
-                        throw new IOException();
+                        System.out.println("Símbolo desconhecido >> "+ e.currentToken.image +
+                                " << Linha:" + e.currentToken.beginLine+", Coluna:" + e.currentToken.beginColumn);
                     }
                 }
             }

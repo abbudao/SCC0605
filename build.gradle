@@ -28,6 +28,13 @@ test {
 		html.enabled = true
 	}
 }
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Jason Parser',
+                   'Implementation-Version': 1.0,
+                   'Main-Class': 'Jason'
+    }
+}
 
 task wrapper(type: Wrapper) {
 	description = 'Generates gradlew[.bat] scripts'
@@ -35,8 +42,3 @@ task wrapper(type: Wrapper) {
 }
 
 mainClassName="Jason"
-// dependencies {
-//     implementation 'org.hibernate:hibernate-core:3.6.7.Final'
-//     api 'com.google.guava:guava:23.0'
-//     testImplementation 'junit:junit:4.+'
-// }
