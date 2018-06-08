@@ -1,0 +1,3 @@
+program PROGRAM_NAME ; 
+variables char  
+begin end .
