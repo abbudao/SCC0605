@@ -1,358 +1,439 @@
 options{
-    LOOKAHEAD = 2;
-    STATIC = false ;
-    ERROR_REPORTING = true;
+LOOKAHEAD = 1;
+STATIC = false ;
+BUILD_TOKEN_MANAGER = true;
 }
 PARSER_BEGIN(Jason)
-    import java.io.File;
-    import java.io.FileInputStream;
-    import java.io.InputStream;
-    import java.io.IOException;
-    import java.io.FileWriter;
     class Jason{
-        public static void main(String[] args)
-            throws ParseException, TokenMgrError, IOException{
-                String file;
-                if (args.length == 1) file = args [0];
-                else file = "";
-                InputStream input = System.in;
-                try
-                {
-                    input = new FileInputStream(new File(file));
-                }
-                catch (IOException e)
-                {
-                System.out.println("Rodando pelo STDIN (Arquivo não encontrado ou não especificado)");
-                }
-                finally{
-                    try
-                    {
-                        Jason parser = new Jason(input);
-                        parser.Program();
-                        System.out.println("Parsing finalizado sem erros!");
-                    }
-                    catch(ParseException e)
-                    {
-                        System.out.println(e.getMessage());
-                    }
-                }
-            }
+    public static void main(String[] args)
+        throws ParseException, TokenMgrError{
+        Jason parser = new Jason(System.in);
+        parser.Program();
+
+        }
+
     }
 PARSER_END(Jason)
 
+    SKIP: {<"#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>}
+    SKIP: {<"/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/">}
+    SKIP: {" " | "\n" | "\r" | "\r\n" | "\t"}
+    TOKEN: {<INTEGER: (["0"-"9"])+>}
+    TOKEN: {<REALNUM: (["0"-"9"])+|(["0"-"9"])+ ["."] (["0"-"9"])+>}
+    TOKEN: {<PROGRAM: "program">}
+    TOKEN: {<BEGIN: "begin">}
+    TOKEN: {<END: "end">}
+    TOKEN: {<READ: "read">}
+    TOKEN: {<WRITE: "write">}
+    TOKEN: {<IF: "if">}
+    TOKEN: {<SET: "set">}
+    TOKEN: {<ENDIF: "endif">}
+    TOKEN: {<ELSE: "else">}
+    TOKEN: {<DO: "do">}
+    TOKEN: {<WHILE: "while">}
+    TOKEN: {<ENDWHILE: "endwhile">}
+    TOKEN: {<UNTIL: "until">}
+    TOKEN: {<ENDUNTIL: "enduntil">}
+    TOKEN: {<CALL: "call">}
+    TOKEN: {<RECORD: "record">}
+    TOKEN: {<TYPES: "types">}
+    TOKEN: {<VARIABLES: "variables">}
+    TOKEN: {<REAL: "real">}
+    TOKEN: {<INT: "integer">}
+    TOKEN: {<PROC: "procedure">}
+    TOKEN: {<PARAM: "parameters">}
+    TOKEN: {<VAR: "var">}
+    TOKEN: {<FUNCTION: "function">}
+    TOKEN: {<RETURNS: "returns">}
+    TOKEN: {<RETURN: "return">}
+    TOKEN: {<THEN: "then">}
+    TOKEN: {<ARRAY: "array">}
+    TOKEN: {<EOL: ";">}
+    TOKEN: {<IDENTIFIER: (["a"-"z", "A"-"Z", "_"])+ (<REALNUM>)*>}
+    TOKEN: {<LBR: "[">}
+    TOKEN: {<RBR: "]">}
+    TOKEN: {<STRING: "\"" (<IDENTIFIER> | <REALNUM> | " ")+ "\"">}
+    TOKEN: {<LP: "(">}
+    TOKEN: {<RP: ")">}
+    TOKEN: {<SLASH: "\\">}
+    TOKEN: {<TIMES: "*">}
+    TOKEN: {<DIV: "/">}
+    TOKEN: {<PLUS: "+">}
+    TOKEN: {<LESS: "-">}
+    TOKEN: {<TIL: "~">}
+    TOKEN: {<AND: "&">}
+    TOKEN: {<EQUAL: "=">}
+    TOKEN: {<EXCLAMATION: "!">}
+    TOKEN: {<LOE: "<=">}
+    TOKEN: {<GOE: ">=">}
+    TOKEN: {<LESSTHAN: "<">}
+    TOKEN: {<GREATERTHAN: ">">}
+    TOKEN: {<ASK: "?">}
+    TOKEN: {<POINT: ".">}
+    TOKEN: {<COLON: ":">}
+    TOKEN: {<COMA: ",">}
+    
+    /*Programa e Bloco*/
+    void Program():
+    {Token point;}
+    {
+    Header() DeclSec() Block()point =<POINT>
+    {System.out.println(point);}
+    }
 
-SKIP: {<"#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>}
-SKIP: {<"/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/">}
-SKIP: {" " | "\n" | "\r" | "\r\n" | "\t"}
-TOKEN: {<NUM: (["0"-"9"])+|(["0"-"9"])+ ["."] (["0"-"9"])+>}
-TOKEN: {<PROGRAM: "program">}
-TOKEN: {<BEGIN: "begin">}
-TOKEN: {<END: "end">}
-TOKEN: {<READ: "read">}
-TOKEN: {<WRITE: "write">}
-TOKEN: {<IF: "if">}
-TOKEN: {<SET: "set">}
-TOKEN: {<ENDIF: "endif">}
-TOKEN: {<ELSE: "else">}
-TOKEN: {<DO: "do">}
-TOKEN: {<WHILE: "while">}
-TOKEN: {<ENDWHILE: "endwhile">}
-TOKEN: {<UNTIL: "until">}
-TOKEN: {<ENDUNTIL: "enduntil">}
-TOKEN: {<CALL: "call">}
-TOKEN: {<RECORD: "record">}
-TOKEN: {<TYPES: "types">}
-TOKEN: {<VARIABLES: "variables">}
-TOKEN: {<REAL: "real">}
-TOKEN: {<INT: "integer">}
-TOKEN: {<PROC: "procedure">}
-TOKEN: {<PARAM: "parameters">}
-TOKEN: {<VAR: "var">}
-TOKEN: {<FUNCTION: "function">}
-TOKEN: {<RETURNS: "returns">}
-TOKEN: {<RETURN: "return">}
-TOKEN: {<THEN: "then">}
-TOKEN: {<ARRAY: "array">}
-TOKEN: {<EOL: ";">}
-TOKEN: {<IDENTIFIER: (["a"-"z", "A"-"Z", "_"])+ (<NUM>)*>}
-TOKEN: {<LBR: "[">}
-TOKEN: {<RBR: "]">}
-TOKEN: {<STRING: "\"" (<IDENTIFIER> | <NUM> | " ")+ "\"">}
-TOKEN: {<LP: "(">}
-TOKEN: {<RP: ")">}
-TOKEN: {<SLASH: "\\">}
-TOKEN: {<TIL: "~">}
-TOKEN: {<PLUS: "+">}
-TOKEN: {<LESS: "-">}
-TOKEN: {<TIMES: "*">}
-TOKEN: {<LESSTHAN: "<">}
-TOKEN: {<GREATERTHAN: ">">}
-TOKEN: {<EXCLAMATION: "!">}
-TOKEN: {<POINT: ".">}
-TOKEN: {<ASK: "?">}
-TOKEN: {<GOE: ">=">}
-TOKEN: {<LOE: "<=">}
-TOKEN: {<EQUAL: "=">}
-TOKEN: {<COLON: ":">}
-TOKEN: {<COMA: ",">}
-TOKEN: {<AND: "&">}
-TOKEN: {<DIV: "/">}
-/*Programa e Bloco*/
-void Program():
-{}
-{
-    Header() DeclSec() Block()<POINT>
+    void Header():
+    {Token program, id, eol;}
+    {
+        program = <PROGRAM> id = <IDENTIFIER> eol = <EOL>
+        {System.out.println(program);}
+        {System.out.println(id);}
+        {System.out.println(eol);}
+    }
+    void Block():
+    {Token begin, end;}
+    {
+        begin = <BEGIN>[Statements()]end = <END>
+        {System.out.println(begin);}
+        {System.out.println(end);}
+    }
+    /*Declaracoes*/
+    void DeclSec():
+    {Token types = null;}
+    {
+        [types = <TYPES> TypeDecls()|VarDeclSec()|SubProgramDecls()]
+        {if(types != null)System.out.println(types);}
+    }
 
-}
-
-void Header():
-{}
-{
-    <PROGRAM><IDENTIFIER><EOL>
-}
-void Block():
-{}
-{
-    <BEGIN>[Statements()]<END>
-}
-/*Declaracoes*/
-void DeclSec():
-{}
-{
-    [<TYPES> TypeDecls()|VarDeclSec()|SubProgramDecls()]
-}
-
-void TypeDecls():
-{}
-{
-    (TypeDecl())+
-}
-void TypeDecl():
-{}
-{
-    <IDENTIFIER> TypeSpecification()
-}
-void TypeSpecification():
-{}
-{
-    ArraySpecification()
+    void TypeDecls():
+    {}
+    {
+        (TypeDecl())+
+    }
+    void TypeDecl():
+    {Token id;}
+    {
+        id = <IDENTIFIER> TypeSpecification()
+        {System.out.println(id);}
+    }
+    void TypeSpecification():
+    {}
+    {
+        ArraySpecification()
         | RecordSpecification()
-}
-void ArraySpecification():
-{}
-{
-    <ARRAY> DataType() <LBR> <NUM> <RBR> <EOL>
-}
+    }
+    void ArraySpecification():
+    {Token array, lbr, num, rbr, eol;}
+    {
+        array = <ARRAY> DataType() lbr = <LBR> num = <INTEGER> rbr = <RBR> eol = <EOL>
+        {System.out.println(array);}
+        {System.out.println(lbr);}
+        {System.out.println(num);}
+        {System.out.println(rbr);}
+        {System.out.println(eol);}
+    }
 
-void RecordSpecification():
-{}
-{
-    <RECORD> VarDecls() <END> <EOL>
-}
+    void RecordSpecification():
+    {Token record, end, eol;}
+    {
+        record = <RECORD> VarDecls() end = <END> eol = <EOL>
+        {System.out.println(record);}
+        {System.out.println(end);}
+        {System.out.println(eol);}
+    }
 
-void VarDeclSec():
-{}
-{
-    <VARIABLES> VarDecls()
-}
+    void VarDeclSec():
+    {Token variables;}
+    {
+        variables = <VARIABLES> VarDecls()
+        {System.out.println(variables);}
+    }
 
-void VarDecls():
-{}
-{
-    VarDecl() ( VarDecl())*
-}
+    void VarDecls():
+    {}
+    {
+        VarDecl() ( VarDecl())*
+    }
 
-void VarDecl():
-{}
-{
-    DataType() IdList() <EOL>
-}
+    void VarDecl():
+    {Token eol;}
+    {
+        DataType() IdList() eol = <EOL>
+        {System.out.println(eol);}
+    }
 
-void DataType():
-{}
-{
-    (<REAL>|<INT>|<IDENTIFIER>|<STRING>)
-}
+    void DataType():
+    {Token real = null, integer = null, id = null, string = null;}
+    {
+        (real = <REAL>| integer = <INT>| id = <IDENTIFIER>| string = <STRING>)
+        {if(real != null)System.out.println(real);}
+        {if(integer != null)System.out.println(integer);}
+        {if(id != null)System.out.println(id);}
+        {if(string != null)System.out.println(string);}
+    }
 
-void IdList():
-{}
-{
-    (<IDENTIFIER> <COMA>)* <IDENTIFIER>
-}
+    void IdList():
+    {Token id = null, coma = null, id2;}
+    {	
+        (LOOKAHEAD(2) id = <IDENTIFIER> coma = <COMA>)* id2 = <IDENTIFIER>
+        {if(id != null)System.out.println(id);}
+        {if(coma != null)System.out.println(coma);}
+        {System.out.println(id2);}
+    }
 
-void SubProgramDecls():
-{}
-{
-    SubProgramDecl() (SubProgramDecl())*
-}
-void SubProgramDecl():
-{}
-{
-    ProcDecl() | FunctionDecl()
-}
-void ProcDecl():
-{}
-{
-    ProcHeader() SubProgramDeclSec() Block() <EOL>
-}
+    void SubProgramDecls():
+    {}
+    {
+        SubProgramDecl() (SubProgramDecl())*
+    }
+    void SubProgramDecl():
+    {}
+    {
+        ProcDecl() | FunctionDecl()
+    }
+    void ProcDecl():
+    {Token eol;}
+    {
+        ProcHeader() SubProgramDeclSec() Block() eol = <EOL>
+        {System.out.println(eol);}
+    }
 
-void ProcHeader():
-{}
-{
-    <PROC><IDENTIFIER><EOL>
-}
-void SubProgramDeclSec():
-{}
-{
-    [ParamDeclSec()] DeclSec()
-}
-void ParamDeclSec():
-{}
-{
-    <PARAM> ParamDecls()
-}
+    void ProcHeader():
+    {Token proc, id, eol;}
+    {
+        proc = <PROC> id = <IDENTIFIER> eol = <EOL>
+        {System.out.println(proc);}
+        {System.out.println(id);}
+        {System.out.println(eol);}
+    }
+    void SubProgramDeclSec():
+    {}
+    {
+        [ParamDeclSec()] DeclSec()
+    }
+    void ParamDeclSec():
+    {Token param;}
+    {
+        param = <PARAM> ParamDecls()
+        {System.out.println(param);}
+    }
 
-void ParamDecls():
-{}
-{
-    ParamDecl() (ParamDecls())*
-}
+    void ParamDecls():
+    {}
+    {
+        (ParamDecl())+
+    }
 
-void ParamDecl():
-{}
-{
-    [<VAR>] DataType() <IDENTIFIER> <EOL>
-}
+    void ParamDecl():
+    {Token var = null, id, eol;}
+    {
+        [var = <VAR>] DataType() id = <IDENTIFIER> eol = <EOL>
+        {if(var != null)System.out.println(var);}
+        {System.out.println(id);}
+        {System.out.println(eol);}
+    }
 
-void FunctionDecl():
-{}
-{
-    FunctionHeader() SubProgramDeclSec() FunctionBlock() <EOL>
-}
+    void FunctionDecl():
+    {Token eol;}
+    {
+        FunctionHeader() SubProgramDeclSec() FunctionBlock() eol = <EOL>
+    }
 
-void FunctionHeader():
-{}
-{
-    <FUNCTION> <IDENTIFIER> <RETURNS> DataType() <EOL>
-}
+    void FunctionHeader():
+    {Token function, id, ret, eol;}
+    {
+        function = <FUNCTION> id = <IDENTIFIER> ret = <RETURNS> DataType() eol = <EOL>
+        {System.out.println(function);}
+        {System.out.println(id);}
+        {System.out.println(ret);}
+        {System.out.println(eol);}
+    }
 
-void FunctionBlock():
-{}
-{
-    <BEGIN> [Statements()] ReturnStatement() <END>
-}
-/* Comandos */
-void Statements():
-{}
-{
-    Statement() (<EOL>Statement())*
-}
+    void FunctionBlock():
+    {Token begin, end;}
+    {
+        begin = <BEGIN> [Statements()] ReturnStatement() end = <END>
+        {System.out.println(begin);}
+        {System.out.println(end);}
+    }
+    /* Comandos */
+    void Statements():
+    {Token eol = null;}
+    {	
+        Statement() ( LOOKAHEAD(2)eol = <EOL>Statement())*
+        {if(eol != null)System.out.println(eol);}
+    }
 
-void Statement():
-{}
-{
-    (<READ> | <WRITE>) Variable()
-        | <SET> Variable() <EQUAL> Expression()
-        | <IF> Condition_Exp() <THEN> Statements() ElseClause()
-        | <WHILE> Condition_Exp() <DO> [Statements()] <ENDWHILE>
-        | <UNTIL> Condition_Exp() <DO> [Statements()] <ENDUNTIL>
-        | <CALL> <IDENTIFIER> [ArgList()]
+    void Statement():
+    {Token read = null, write = null, set = null,
+            equal = null, i = null, then = null,
+            w = null, d1 = null, endwhile = null,
+            until = null, d2 = null, enduntil = null,
+            call = null, id = null;}
+    {
+        (read = <READ> | write = <WRITE>) Variable()
+        | set = <SET> Variable() equal = <EQUAL> Expression()
+        | i = <IF> Condition_Exp() then = <THEN> Statements() ElseClause()
+        | w = <WHILE> Condition_Exp() d1 = <DO> [Statements()] endwhile = <ENDWHILE>
+        | until = <UNTIL> Condition_Exp() d2 = <DO> [Statements()] enduntil = <ENDUNTIL>
+        | call = <CALL> id = <IDENTIFIER> [ArgList()]
         | Condition_Exp()
-}
-void Condition_Exp():
-{}
-{
-    Condition()[<ASK> Condition_Exp() <COLON> Condition_Exp()] 
-}
-void ElseClause():
-{}
-{
-    [<ELSE> Statements()] <ENDIF>
-}
-void ReturnStatement():
-{}
-{
-    <EOL> <RETURN><LP>Condition_Exp()<RP>
-}
+        {if(read != null)System.out.println(read);}
+        {if(write != null)System.out.println(write);}
+        {if(set != null)System.out.println(set);}
+        {if(equal != null)System.out.println(equal);}
+        {if(i != null)System.out.println(i);}
+        {if(then != null)System.out.println(then);}
+        {if(w != null)System.out.println(w);}
+        {if(d1 != null)System.out.println(d1);}
+        {if(endwhile != null)System.out.println(endwhile);}
+        {if(until != null)System.out.println(until);}
+        {if(d2 != null)System.out.println(d2);}
+        {if(enduntil != null)System.out.println(enduntil);}
+        {if(call != null)System.out.println(call);}
+        {if(id != null)System.out.println(id);}
+    }
+    void Condition_Exp():
+    {Token ask = null, colon = null;}
+    {
+        Condition()[ask = <ASK> Condition_Exp() colon = <COLON> Condition_Exp()]
+        {if(ask != null)System.out.println(ask);}
+        {if(colon != null)System.out.println(colon);}
+    }
+    void ElseClause():
+    {Token el = null, endif;}
+    {
+        [el = <ELSE> Statements()] endif = <ENDIF>
+        {if(el != null)System.out.println(el);}
+        {System.out.println(endif);} 
+    }
+    void ReturnStatement():
+    {Token eol, ret, lp, rp;}
+    {
+        eol = <EOL> ret = <RETURN> lp = <LP> Condition_Exp() rp = <RP>
+        {System.out.println(eol);}
+        {System.out.println(ret);}
+        {System.out.println(lp);}
+        {System.out.println(rp);}
+    }
 
-void ArgList():
-{}
-{
-    <LP> [Arguments()] <RP>
-}
+    void ArgList():
+    {Token lp, rp;}
+    {
+        lp = <LP> [Arguments()] rp = <RP>
+        {System.out.println(lp);}
+        {System.out.println(rp);}
+    }
 
-void Arguments():
-{}
-{
-    (Condition_Exp() <COMA>)* Condition_Exp()
-}
-void Condition():
-{}
-{
-    CompoundCondition() (<SLASH>CompoundCondition())*
-}
+    void Arguments():
+    {Token coma = null;}
+    {
+        (LOOKAHEAD(2) Condition_Exp() coma = <COMA> )* Condition_Exp()
+        {if(coma != null)System.out.println(coma);}
+    }
+    void Condition():
+    {Token slash = null;}
+    {
+        CompoundCondition() (slash = <SLASH>CompoundCondition())*
+        {if(slash != null)System.out.println(slash);}
+    }
 
-void CompoundCondition():
-{}
-{
-    SimpleCondition() (<AND> SimpleCondition())*
-}
-void SimpleCondition():
-{}
-{
-    Expression() (RelOp() Expression())*
-}
-void Expression():
-{}
-{
-    Term() (AddOp() Term())*
-}
-void Term():
-{}
-{
-    Unary() (MultOp() Unary())*
-}
+    void CompoundCondition():
+    {Token and = null;}
+    {
+        SimpleCondition() (and = <AND> SimpleCondition())*
+        {if(and != null)System.out.println(and);}
+    }
+    void SimpleCondition():
+    {}
+    {
+        Expression() (RelOp() Expression())*
+    }
+    void Expression():
+    {}
+    {
+        Term() (AddOp() Term())*
+    }
+    void Term():
+    {}
+    {
+        Unary() (MultOp() Unary())*
+    }
 
-/*Expressoes*/
-void Unary():
-{}
-{
-    (<PLUS>|<LESS>) Unary()
+    /*Expressoes*/
+    void Unary():
+    {Token plus = null, less = null;}
+    {
+        (plus = <PLUS>| less = <LESS>) Unary()
         | Factor()
-}
-void Factor():
-{}
-{
-    [<TIL>] (Variable()
-            | <NUM>
-            | <STRING>
-            | <LP> Condition_Exp() <RP>
-            | <IDENTIFIER> ArgList() )
-}
-void Variable():
-{}
-{
-    <IDENTIFIER> [<LBR> Expression() <RBR>]
-        (<POINT> <IDENTIFIER> [<LBR>Expression()<RBR>])*
-}
-void RelOp():
-{}
-{
-    <EQUAL>
-        | <EXCLAMATION>
-        | <GREATERTHAN>
-        | <LESSTHAN>
-        | <LOE>
-        | <GOE>
-}
-void AddOp():
-{}
-{
-    <PLUS>
-        | <LESS>
-}
-void MultOp():
-{}
-{
-    <TIMES> | <DIV>
-}
+        {if(plus != null)System.out.println(plus);}
+        {if(less != null)System.out.println(less);}
+    }
+    void Factor():
+    {Token til = null, num = null, integer = null, str = null,
+            lp = null, rp = null, id = null;}
+    {
+        [til = <TIL>] (LOOKAHEAD(2)
+        Variable()
+        | num = <REALNUM>
+        | integer = <INTEGER>
+        | str = <STRING>
+        | lp = <LP> Condition_Exp() rp = <RP>
+        | id = <IDENTIFIER> ArgList() )
+        {if(til != null)System.out.println(til);}
+        {if(num != null)System.out.println(num);}
+        {if(integer != null)System.out.println(integer);}
+        {if(str != null)System.out.println(str);}
+        {if(lp != null)System.out.println(lp);}
+        {if(rp != null)System.out.println(rp);}
+        {if(id != null)System.out.println(id);}
+    }
+    void Variable():
+    {Token id, lbr = null, rbr = null, point = null,
+            id2 = null, lbr2 = null, rbr2 = null;}
+    {
+        id = <IDENTIFIER> [lbr = <LBR> Expression() rbr = <RBR>]
+            (point = <POINT> id2 = <IDENTIFIER> [lbr2 = <LBR>Expression() rbr2 = <RBR>])*
+
+        {System.out.println(id);}
+        {if(lbr != null)System.out.println(lbr);}
+        {if(rbr != null)System.out.println(rbr);}
+        {if(point != null)System.out.println(point);}
+        {if(id2 != null)System.out.println(id2);}
+        {if(lbr2 != null)System.out.println(lbr2);}
+        {if(rbr2 != null)System.out.println(rbr2);}
+    }
+    void RelOp():
+    {Token equal = null, ex= null, gr= null,
+            ls = null, loe = null, goe = null;}
+    {
+        (equal = <EQUAL>)
+        | (ex = <EXCLAMATION>)
+        | (gr = <GREATERTHAN>)
+        | (ls = <LESSTHAN>)
+        | (loe = <LOE>)
+        | (goe = <GOE>)
+
+        {if(equal != null)System.out.println(equal);}
+        {if(ex != null)System.out.println(ex);}
+        {if(gr != null)System.out.println(gr);}
+        {if(ls != null)System.out.println(ls);}
+        {if(loe != null)System.out.println(loe);}
+        {if(goe != null)System.out.println(goe);}
+    }
+    void AddOp():
+    {Token plus = null, less = null;}
+    {
+        plus = <PLUS>
+        | less = <LESS>
+
+        {if(plus != null)System.out.println(plus);}
+        {if(less != null)System.out.println(less);}
+    }
+    void MultOp():
+    {Token times = null, div = null;}
+    {
+        times = <TIMES> | div = <DIV>
+        {if(times != null)System.out.println(times);}
+        {if(div != null)System.out.println(div);}
+
+    }

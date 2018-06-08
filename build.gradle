@@ -40,5 +40,12 @@ task wrapper(type: Wrapper) {
 	description = 'Generates gradlew[.bat] scripts'
 	gradleVersion = '4.6'
 }
+compileJavacc {
+    include '**/*.java'
+    inputDirectory = file('src/main/javacc')
+    outputDirectory = file(project.buildDir.absolutePath + '/generated/javacc')
+}
+
+
 
 mainClassName="Jason"
