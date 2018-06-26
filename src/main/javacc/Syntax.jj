@@ -100,14 +100,20 @@ PARSER_END(Jason)
     void DeclSec():
     {Token types = null;}
     {
-        [types = <TYPES> TypeDecls()|VarDeclSec()|SubProgramDecls()]
-        {if(types != null)System.out.println(types);}
+        [TypeDeclSec()][VarDeclSec()][SubProgramDecls()]
+
+    }
+
+    void TypeDeclSec():
+    {Token types;}
+    {
+        <TYPES> TypeDecls()
     }
 
     void TypeDecls():
     {}
     {
-        (TypeDecl())+
+        TypeDecl() (TypeDecl())*
     }
     void TypeDecl():
     {Token id;}
@@ -173,7 +179,7 @@ PARSER_END(Jason)
 
     void IdList():
     {Token id = null, coma = null, id2;}
-    {	
+    {   
         (LOOKAHEAD(2) id = <IDENTIFIER> coma = <COMA>)* id2 = <IDENTIFIER>
         {if(id != null)System.out.println(id);}
         {if(coma != null)System.out.println(coma);}
@@ -258,7 +264,7 @@ PARSER_END(Jason)
     /* Comandos */
     void Statements():
     {Token eol = null;}
-    {	
+    {   
         Statement() ( LOOKAHEAD(2)eol = <EOL>Statement())*
         {if(eol != null)System.out.println(eol);}
     }
