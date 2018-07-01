@@ -3,13 +3,30 @@ LOOKAHEAD = 1;
 STATIC = false ;
 BUILD_TOKEN_MANAGER = true;
 }
+
+
 PARSER_BEGIN(Jason)
+import java.util.ArrayList;
+import java.util.List;
+import Simbolo.Simbolo;
     class Jason{
+    List<Simbolo> symbol_table = new ArrayList<Simbolo>();
+    int nivel_atual = 0;
+    int err_count = 0;
+    public Simbolo findSymbol(String id){
+    	for(Simbolo s : symbol_table) {
+	        if(s.id.equals(id)) {
+	            return s;
+	        }
+	    }
+	    return null;
+    }
+
+
     public static void main(String[] args)
         throws ParseException, TokenMgrError{
-        Jason parser = new Jason(System.in);
-        parser.Program();
-
+	        Jason parser = new Jason(System.in);
+	        parser.Program();
         }
 
     }
@@ -73,19 +90,31 @@ PARSER_END(Jason)
     TOKEN: {<COLON: ":">}
     TOKEN: {<COMA: ",">}
     
+
+
     /*Programa e Bloco*/
     void Program():
-    {Token point;}
+    {Token point;
+	 symbol_table.add(new Simbolo("integer", 0, "type", null));
+     symbol_table.add(new Simbolo("real", 0, "type", null));
+     symbol_table.add(new Simbolo("string", 0, "type", null));
+     symbol_table.add(new Simbolo("array", 0, "type", null));
+     symbol_table.add(new Simbolo("procedure", 0, "proc", null));
+     symbol_table.add(new Simbolo("function", 0, "func", null));
+	}
     {
     Header() DeclSec() Block()point =<POINT>
     {System.out.println(point);}
+    {
+    	System.out.println("\nCompilacao finalizada com " + err_count + " erros\n\n\n");
+    }
     }
 
     void Header():
     {Token program, id, eol;}
     {
         program = <PROGRAM> id = <IDENTIFIER> eol = <EOL>
-        {System.out.println(program);}
+        {System.out.println(program.image);}
         {System.out.println(id);}
         {System.out.println(eol);}
     }
@@ -98,7 +127,7 @@ PARSER_END(Jason)
     }
     /*Declaracoes*/
     void DeclSec():
-    {Token types = null;}
+    {}
     {
         [TypeDeclSec()][VarDeclSec()][SubProgramDecls()]
 
@@ -107,7 +136,8 @@ PARSER_END(Jason)
     void TypeDeclSec():
     {Token types;}
     {
-        <TYPES> TypeDecls()
+        types=<TYPES> TypeDecls()
+        {System.out.println(types);}
     }
 
     void TypeDecls():
@@ -119,7 +149,12 @@ PARSER_END(Jason)
     {Token id;}
     {
         id = <IDENTIFIER> TypeSpecification()
-        {System.out.println(id);}
+        {
+        	if(findSymbol(id.image) != null){
+        		System.out.println("\nErro, tipo ja declarado!\n");
+        		err_count++;
+        	}
+        }
     }
     void TypeSpecification():
     {}
@@ -161,13 +196,14 @@ PARSER_END(Jason)
     }
 
     void VarDecl():
-    {Token eol;}
+    {Token eol;
+    	String type;}
     {
-        DataType() IdList() eol = <EOL>
+        type = DataType() IdList(type) eol = <EOL>
         {System.out.println(eol);}
     }
 
-    void DataType():
+    String DataType():
     {Token real = null, integer = null, id = null, string = null;}
     {
         (real = <REAL>| integer = <INT>| id = <IDENTIFIER>| string = <STRING>)
@@ -175,15 +211,58 @@ PARSER_END(Jason)
         {if(integer != null)System.out.println(integer);}
         {if(id != null)System.out.println(id);}
         {if(string != null)System.out.println(string);}
+        {
+        	if(real != null)
+        		return real.image;
+        	if(integer != null)
+        		return integer.image;
+        	if(id != null && findSymbol(id.image) == null){
+        		System.out.println("Erro, tipo nao declarado!");
+        		err_count++;
+        	}
+        	if(id != null)
+        		return id.image;
+        	if(string != null)
+        		return string.image;
+        }
     }
 
-    void IdList():
+    void IdList(String type):
     {Token id = null, coma = null, id2;}
     {   
         (LOOKAHEAD(2) id = <IDENTIFIER> coma = <COMA>)* id2 = <IDENTIFIER>
         {if(id != null)System.out.println(id);}
         {if(coma != null)System.out.println(coma);}
         {System.out.println(id2);}
+        {	
+        	Simbolo id_symbol = null;
+        	if(id != null)
+        		 id_symbol = findSymbol(id.image);
+        	Simbolo id2_symbol = findSymbol(id2.image);
+           	if(id != null && id_symbol != null){
+        		System.out.println("\nErro, variavel '" +id.image+ "' ja declarada!\n");
+        		err_count++;
+           	}
+        	else if(id != null){
+        		Simbolo aux = findSymbol(type);
+        		if(aux != null)//tipo declarado
+        			symbol_table.add(new Simbolo(id.image, nivel_atual, "var", aux));
+        	}
+        	
+        	if(id2_symbol != null){
+        		System.out.println("\nErro, variavel '" +id2.image+ "' ja declarada!\n");
+        		err_count++;
+        	}
+        	else{
+        		Simbolo aux = findSymbol(type);
+        		if(aux != null){//tipo declarado
+        			symbol_table.add(new Simbolo(id2.image, nivel_atual, "var", aux));
+        		}
+        		else{
+        			return;
+        		}
+        	}
+        }
     }
 
     void SubProgramDecls():
@@ -210,6 +289,14 @@ PARSER_END(Jason)
         {System.out.println(proc);}
         {System.out.println(id);}
         {System.out.println(eol);}
+        {
+        	if(findSymbol(id.image) != null)
+        		System.out.println("\nErro, procedure '" +id.image+ "'' ja declarado!\n");
+        	else{
+        		nivel_atual++;
+        	}
+        	symbol_table.add(new Simbolo(proc.image, nivel_atual, "proc", findSymbol("procedure")));
+        }
     }
     void SubProgramDeclSec():
     {}
