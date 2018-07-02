@@ -13,6 +13,7 @@ import Simbolo.Simbolo;
     List<Simbolo> symbol_table = new ArrayList<Simbolo>();
     int nivel_atual = 0;
     int err_count = 0;
+    int nparam = 0;
     public Simbolo findSymbol(String id){
     	for(Simbolo s : symbol_table) {
 	        if(s.id.equals(id)) {
@@ -258,9 +259,6 @@ PARSER_END(Jason)
         		if(aux != null){//tipo declarado
         			symbol_table.add(new Simbolo(id2.image, nivel_atual, "var", aux));
         		}
-        		else{
-        			return;
-        		}
         	}
         }
     }
@@ -276,13 +274,19 @@ PARSER_END(Jason)
         ProcDecl() | FunctionDecl()
     }
     void ProcDecl():
-    {Token eol;}
+    {Token eol; String proc_name;}
     {
-        ProcHeader() SubProgramDeclSec() Block() eol = <EOL>
+        proc_name = ProcHeader() SubProgramDeclSec() Block() eol = <EOL>
         {System.out.println(eol);}
+       {	
+
+        	findSymbol(proc_name).nparam = nparam;
+        	nparam = 0;
+        	nivel_atual--;
+        }
     }
 
-    void ProcHeader():
+    String ProcHeader():
     {Token proc, id, eol;}
     {
         proc = <PROC> id = <IDENTIFIER> eol = <EOL>
@@ -295,7 +299,8 @@ PARSER_END(Jason)
         	else{
         		nivel_atual++;
         	}
-        	symbol_table.add(new Simbolo(proc.image, nivel_atual, "proc", findSymbol("procedure")));
+        	symbol_table.add(new Simbolo(id.image, nivel_atual, "proc", findSymbol("procedure")));
+        	return id.image;
         }
     }
     void SubProgramDeclSec():
@@ -323,15 +328,21 @@ PARSER_END(Jason)
         {if(var != null)System.out.println(var);}
         {System.out.println(id);}
         {System.out.println(eol);}
+        {nparam++;}
     }
 
     void FunctionDecl():
-    {Token eol;}
+    {Token eol;String function_name;}
     {
-        FunctionHeader() SubProgramDeclSec() FunctionBlock() eol = <EOL>
+        function_name = FunctionHeader() SubProgramDeclSec() FunctionBlock() eol = <EOL>
+        {
+        	findSymbol(function_name).nparam = nparam;
+        	nparam = 0;
+        	nivel_atual--;
+        }
     }
 
-    void FunctionHeader():
+    String FunctionHeader():
     {Token function, id, ret, eol;}
     {
         function = <FUNCTION> id = <IDENTIFIER> ret = <RETURNS> DataType() eol = <EOL>
@@ -339,6 +350,13 @@ PARSER_END(Jason)
         {System.out.println(id);}
         {System.out.println(ret);}
         {System.out.println(eol);}
+        {
+        	if(findSymbol(id.image) != null)
+        		System.out.println("\nErro, funcao '" +id.image+ "'' ja declarada!\n");
+    		nivel_atual++;
+        	symbol_table.add(new Simbolo(id.image, nivel_atual, "func", findSymbol("function")));
+        	return id.image;
+        }
     }
 
     void FunctionBlock():
@@ -479,6 +497,7 @@ PARSER_END(Jason)
         {if(lp != null)System.out.println(lp);}
         {if(rp != null)System.out.println(rp);}
         {if(id != null)System.out.println(id);}
+
     }
     void Variable():
     {Token id, lbr = null, rbr = null, point = null,
