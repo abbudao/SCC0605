@@ -20,6 +20,11 @@ public class InvalidGrammarTests{
         InputStream input = System.in;
         try{
             input = new FileInputStream(new File(file));
+            String[] path =file.split("/[^/]*/",0);
+            System.out.println("*****************************");
+            System.out.println("Test:"+path[path.length - 1]);
+            System.out.println("Grammar: Should be invalid");
+            System.out.println("*****************************");
         }
         catch (IOException e)
         {
