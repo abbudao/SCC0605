@@ -107,7 +107,12 @@ PARSER_END(Jason)
     Header() DeclSec() Block()point =<POINT>
     {System.out.println(point);}
     {
-    	System.out.println("\nCompilacao finalizada com " + err_count + " erros\n\n\n");
+        System.out.println("\nCompilacao finalizada com " + err_count + " erros\n\n\n");
+    }
+    {
+        if(err_count>0){
+        throw new ParseException();
+        }
     }
     }
 
