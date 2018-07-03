@@ -1,0 +1,13 @@
+program PROGRAM_NAME ; 
+variables real PARAMETER;
+         real PARAMETER2;
+function identifier returns real;
+parameters var real ID_NAME; 
+variables real RETURN_VAR;
+begin 
+	;return (RETURN_VAR)
+end; 
+begin 
+call identifier (PARAMETER, PARAMETER2) 
+
+end .

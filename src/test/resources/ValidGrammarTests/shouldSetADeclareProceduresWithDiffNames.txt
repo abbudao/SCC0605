@@ -1,0 +1,6 @@
+program PROGRAM_NAME ; 
+procedure ID_NAME ; 
+begin end;
+procedure ID_NAME2 ; 
+begin end;
+begin end .

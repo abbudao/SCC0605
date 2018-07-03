@@ -1,4 +1,7 @@
 package Simbolo;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Simbolo{
 	public String id;
 	public int nivel;
@@ -8,6 +11,7 @@ public class Simbolo{
 	public int nparam;
 	public int inf;
 	public int sup;
+	public List<Simbolo> arguments;
 
 	public Simbolo(String id, int nivel, String categoria, Simbolo tipo){
 		this.id = id;
@@ -17,6 +21,7 @@ public class Simbolo{
 		nparam = 0;
 		inf = 0;
 		sup = 0;
+		arguments = new ArrayList<Simbolo>();
 	}
 
 }
