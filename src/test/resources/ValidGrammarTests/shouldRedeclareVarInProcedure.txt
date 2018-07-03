@@ -1,0 +1,8 @@
+program PROGRAM_NAME ; 
+variables real VAR_NAME;
+procedure ID_NAME ; 
+variables real VAR_NAME;
+begin 
+	set VAR_NAME = 10.0
+end; 
+begin end .

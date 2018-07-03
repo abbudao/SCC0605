@@ -1,0 +1,9 @@
+program PROGRAM_NAME ; 
+variables real VAR_NAME;
+function identifier returns real; 
+variables real RETURN_VAR;
+begin 
+	set VAR_NAME = 10.0;
+	return (RETURN_VAR)
+end; 
+begin end .

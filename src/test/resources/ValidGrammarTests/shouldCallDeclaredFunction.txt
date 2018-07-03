@@ -1,0 +1,11 @@
+program PROGRAM_NAME ; 
+
+function identifier returns real; 
+variables real RETURN_VAR;
+begin 
+	;return (RETURN_VAR)
+end; 
+begin 
+call identifier () 
+
+end .

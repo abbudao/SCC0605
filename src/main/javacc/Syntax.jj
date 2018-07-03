@@ -15,20 +15,35 @@ import Simbolo.Simbolo;
         int nparam = 0;
         int arg_count = 0;
         boolean isParam = false;
-        public Simbolo findSymbol(String id){
+        public Simbolo findSymbolinScope(String id, int nivel){
         	for(Simbolo s : symbol_table) {
-    	        if(s.id.equals(id)) {
+    	        if(s.id.equals(id) && s.nivel == nivel) {
     	            return s;
     	        }
     	    }
     	    return null;
         }
+        public Simbolo findSymbol(String id){
+            for(Simbolo s : symbol_table) {
+                if(s.id.equals(id)) {
+                    return s;
+                }
+            }
+            return null;
+        }
         public void deleteSymbols(int nivel){
-        	for(Simbolo s : symbol_table){
-        		if(s.nivel == nivel){
-        			symbol_table.remove(symbol_table.indexOf(s));
+        	for(int i = symbol_table.size() - 1; i >= 0; i--){
+        		if(symbol_table.get(i).nivel == nivel){
+        			symbol_table.remove(i);
         		}
         	}
+        }
+        public void printSymbols(){
+            System.out.println("############################");
+            for(Simbolo s : symbol_table){
+                System.out.println(s.id);
+            }
+            System.out.println("############################");
         }
 
         public static void main(String[] args)
@@ -160,7 +175,7 @@ PARSER_END(Jason)
     {
         id = <IDENTIFIER> TypeSpecification()
         {
-        	if(findSymbol(id.image) != null){
+        	if(findSymbolinScope(id.image, nivel_atual) != null){
         		System.out.println("\nErro, tipo ja declarado!\n");
         		err_count++;
         	}
@@ -244,8 +259,8 @@ PARSER_END(Jason)
         {	
         	Simbolo id_symbol = null;
         	if(id != null)
-        		 id_symbol = findSymbol(id.image);
-        	Simbolo id2_symbol = findSymbol(id2.image);
+        		 id_symbol = findSymbolinScope(id.image, nivel_atual);
+        	Simbolo id2_symbol = findSymbolinScope(id2.image, nivel_atual);
            	if(id != null && id_symbol != null){
         		System.out.println("\nErro, variavel '" +id.image+ "' ja declarada!\n");
         		err_count++;
@@ -285,7 +300,7 @@ PARSER_END(Jason)
         proc_name = ProcHeader() SubProgramDeclSec(proc_name) Block() eol = <EOL>
         {System.out.println(eol);}
        {	
-
+            deleteSymbols(nivel_atual);
         	findSymbol(proc_name).nparam = nparam;
         	nparam = 0;
         	nivel_atual--;
@@ -348,12 +363,12 @@ PARSER_END(Jason)
     void FunctionDecl():
     {Token eol;String function_name;nivel_atual++;}
     {
-        function_name = FunctionHeader() SubProgramDeclSec(function_name) FunctionBlock() eol = <EOL>
+        function_name = FunctionHeader() SubProgramDeclSec(function_name) FunctionBlock(function_name) eol = <EOL>
         {
+            deleteSymbols(nivel_atual);
         	findSymbol(function_name).nparam = nparam;
         	nparam = 0;
         	nivel_atual--;
-
         }
     }
 
@@ -383,11 +398,11 @@ PARSER_END(Jason)
         }
     }
 
-    void FunctionBlock():
+    void FunctionBlock(String id):
     {Token begin, end;}
     {
         begin = <BEGIN>{System.out.println(begin);} 
-        [Statements()] ReturnStatement() end = <END>{System.out.println(end);}
+        [Statements()] ReturnStatement(id) end = <END>{System.out.println(end);}
     }
     /* Comandos */
     void Statements():
@@ -442,11 +457,8 @@ PARSER_END(Jason)
         		err_count++;
         		System.out.println("Erro, condicao invalida!");
         	}
-        	if(!tipo3.equals("integer")){
-        		err_count++;
-        		System.out.println("Erro, condicao invalida!");
-        	}
-        	return "integer";
+
+        	return tipo3;
 
         }
     }
@@ -457,14 +469,21 @@ PARSER_END(Jason)
         {if(el != null)System.out.println(el);}
         {System.out.println(endif);} 
     }
-    void ReturnStatement():
-    {Token eol, ret, lp, rp;}
+    void ReturnStatement(String id):
+    {Token eol, ret, lp, rp;
+     String tipo;}
     {
-        eol = <EOL> ret = <RETURN> lp = <LP> Condition_Exp() rp = <RP>
+        eol = <EOL> ret = <RETURN> lp = <LP> tipo =  Condition_Exp() rp = <RP>
         {System.out.println(eol);}
         {System.out.println(ret);}
         {System.out.println(lp);}
         {System.out.println(rp);}
+        {
+            if(!tipo.equals(findSymbol(id).tipo.id)){
+                err_count++;
+                System.out.println("Erro, tipo de retorno nao coincide com o tipo da funcao!");
+            }
+        }
     }
 
     void ArgList(String id):
