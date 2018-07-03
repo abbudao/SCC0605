@@ -9,34 +9,33 @@ import java.util.ArrayList;
 import java.util.List;
 import Simbolo.Simbolo;
     class Jason{
-    List<Simbolo> symbol_table = new ArrayList<Simbolo>();
-    int nivel_atual = 0;
-    int err_count = 0;
-    int nparam = 0;
-    int arg_count = 0;
-    boolean isParam = false;
-    public Simbolo findSymbol(String id){
-    	for(Simbolo s : symbol_table) {
-	        if(s.id.equals(id)) {
-	            return s;
-	        }
-	    }
-	    return null;
-    }
-    public int deleteSymbols(int nivel){
-    	for(Simbolo s : symbol_table){
-    		if(s.nivel == nivel){
-    			symbol_table.remove(symbol_table.indexOf(s));
-    		}
-    	}
-    	return 0;
-    }
-
-    public static void main(String[] args)
-        throws ParseException, TokenMgrError{
-	        Jason parser = new Jason(System.in);
-	        parser.Program();
+        List<Simbolo> symbol_table = new ArrayList<Simbolo>();
+        int nivel_atual = 0;
+        int err_count = 0;
+        int nparam = 0;
+        int arg_count = 0;
+        boolean isParam = false;
+        public Simbolo findSymbol(String id){
+        	for(Simbolo s : symbol_table) {
+    	        if(s.id.equals(id)) {
+    	            return s;
+    	        }
+    	    }
+    	    return null;
         }
+        public void deleteSymbols(int nivel){
+        	for(Simbolo s : symbol_table){
+        		if(s.nivel == nivel){
+        			symbol_table.remove(symbol_table.indexOf(s));
+        		}
+        	}
+        }
+
+        public static void main(String[] args)
+            throws ParseException, TokenMgrError{
+    	        Jason parser = new Jason(System.in);
+    	        parser.Program();
+            }
 
     }
 PARSER_END(Jason)
@@ -217,25 +216,24 @@ PARSER_END(Jason)
     String DataType():
     {Token real = null, integer = null, id = null, string = null;}
     {
-        (real = <REAL>| integer = <INT>| id = <IDENTIFIER>| string = <STRING>)
-        {if(real != null)System.out.println(real);}
-        {if(integer != null)System.out.println(integer);}
-        {if(id != null)System.out.println(id);}
-        {if(string != null)System.out.println(string);}
-        {
-        	if(real != null)
-        		return real.image;
-        	if(integer != null)
-        		return integer.image;
-        	if(id != null && findSymbol(id.image) == null){
-        		System.out.println("Erro, tipo nao declarado!");
-        		err_count++;
-        	}
-        	if(id != null)
-        		return id.image;
-        	if(string != null)
-        		return string.image;
-        }
+        (real = <REAL>{if(real != null)System.out.println(real);
+                       if(real != null)
+                            return real.image;}
+            | integer = <INT>{if(integer != null)System.out.println(integer);
+                              if(integer != null)
+                                    return integer.image;}
+            | id = <IDENTIFIER>{if(id != null)System.out.println(id);
+                                if(id != null && findSymbol(id.image) == null){
+                                    System.out.println("Erro, tipo nao declarado!");
+                                    err_count++;
+                                }
+                                if(id != null)
+                                    return id.image;
+                                    }
+            | string = <STRING>{if(string != null)System.out.println(string);
+                                if(string != null)
+                                    return string.image;})
+        
     }
 
     void IdList(String type):
@@ -303,8 +301,10 @@ PARSER_END(Jason)
         {System.out.println(id);}
         {System.out.println(eol);}
         {
-        	if(findSymbol(id.image) != null)
+        	if(findSymbol(id.image) != null){
         		System.out.println("\nErro, procedure '" +id.image+ "'' ja declarado!\n");
+                err_count++;
+            }
 
         	symbol_table.add(new Simbolo(id.image, nivel_atual-1, "proc", findSymbol("procedure")));
         	return id.image;
@@ -405,57 +405,24 @@ PARSER_END(Jason)
     String tipo1 = null, tipo2 = null;
 	}
     {
-        (read = <READ> | write = <WRITE>) tipo1 = Variable()
-        | set = <SET> tipo1 = Variable() equal = <EQUAL> tipo2 = Expression()
-        | i = <IF> tipo1 = Condition_Exp() then = <THEN> Statements() ElseClause()
-        | w = <WHILE> Condition_Exp() d1 = <DO> [Statements()] endwhile = <ENDWHILE>
-        | until = <UNTIL> Condition_Exp() d2 = <DO> [Statements()] enduntil = <ENDUNTIL>
-        | call = <CALL> id = <IDENTIFIER> [ArgList(id.image)]
+        (read = <READ> {System.out.println(read);}| write = <WRITE> {System.out.println(write);}) tipo1 = Variable()
+        | set = <SET>  tipo1 = Variable() equal = <EQUAL>  tipo2 = Expression(){System.out.println(set);}{System.out.println(equal);}
+            {
+                if(set != null){
+                    if(!tipo1.equals(tipo2)){
+                        err_count++;
+                        System.out.println("\nErro, tipos incompativeis!\n");
+                    } if (tipo1.equals("invalid")){
+                        err_count++;
+                        System.out.println("\nErro, tipos incompativeis!\n");
+                    }
+                }
+            }
+        | i = <IF> {System.out.println(i);} tipo1 = Condition_Exp() then = <THEN> {System.out.println(then);} Statements() ElseClause()
+        | w = <WHILE> Condition_Exp() {System.out.println(w);} d1 = <DO> {System.out.println(d1);} [Statements()] endwhile = <ENDWHILE> {System.out.println(endwhile);}
+        | until = <UNTIL> Condition_Exp(){System.out.println(until);} d2 = <DO> {System.out.println(d2);} [Statements()] enduntil = <ENDUNTIL> {System.out.println(enduntil);}
+        | call = <CALL> id = <IDENTIFIER>[ArgList(id.image)] {System.out.println(call);} {System.out.println(id);} 
         | tipo1 = Condition_Exp()
-
-        {
-        if(read != null)
-        	System.out.println(read);
-        if(write != null)
-        	System.out.println(write);
-        if(set != null)
-        	System.out.println(set);
-        if(equal != null)
-        	System.out.println(equal);
-        if(i != null)
-        	System.out.println(i);
-        if(then != null)
-        	System.out.println(then);
-        if(w != null)
-        	System.out.println(w);
-        if(d1 != null)
-        	System.out.println(d1);
-        if(endwhile != null)
-        	System.out.println(endwhile);
-        if(until != null)
-        	System.out.println(until);
-        if(d2 != null)
-        	System.out.println(d2);
-        if(enduntil != null)
-        	System.out.println(enduntil);
-        if(call != null)
-        	System.out.println(call);
-        if(id != null)
-        	System.out.println(id);
-        	
-        	if(set != null){
-	        	if(!tipo1.equals(tipo2)){
-	        		err_count++;
-	        		System.out.println("\nErro, tipos incompativeis!\n");
-	        	} if (tipo1.equals("invalid")){
-	        		err_count++;
-	        		System.out.println("\nErro, tipos incompativeis!\n");
-	        	}
-	        	System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + tipo1 + tipo2);	
-        	}
-        	System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + tipo1 + tipo2);	
-        
-        }
     }
     String Condition_Exp():
     {Token ask = null, colon = null;
@@ -508,8 +475,11 @@ PARSER_END(Jason)
         {System.out.println(rp);}
         {
         	Simbolo s = findSymbol(id);
-
-        	if(s.nparam != arg_count){
+            if(s == null){
+                err_count++;
+                System.out.println("Erro, funcao ou procedure nao declarado!");
+            }
+        	else if(s.nparam != arg_count){
         		err_count++;
         		System.out.println("Erro, numero de parâmetros incorreto!");
         	}
@@ -555,7 +525,7 @@ PARSER_END(Jason)
         tipo1 = SimpleCondition() (and = <AND> tipo2 = SimpleCondition())*
         {if(and != null)System.out.println(and);}
         {
-        	if(tipo2 == null || tipo2.equals("invalid")){
+        	if(tipo2 == null || (tipo2 != null && tipo2.equals("invalid")) ){
         		tipo_resultante = tipo1;
         	}else{
         		if(tipo1.equals("invalid")){
@@ -576,7 +546,7 @@ PARSER_END(Jason)
     {
        tipo1 = Expression() (RelOp() tipo2 = Expression())*
         {
-        	if(tipo2 == null || tipo2.equals("invalid")){
+        	if(tipo2 == null || (tipo2 != null && tipo2.equals("invalid"))){
         		tipo_resultante = tipo1;
         	}else{
         		if(tipo1.equals("invalid")){
@@ -663,24 +633,13 @@ PARSER_END(Jason)
      String tipo = "invalid";}
     {
         [til = <TIL> {System.out.println(til);}] (LOOKAHEAD(2)
-        tipo = Variable()
-        | num = <REALNUM> {System.out.println(num);}
-        | integer = <INTEGER> {System.out.println(integer);}
-        | str = <STRING> {System.out.println(str);}
+        tipo = Variable(){return tipo;}
+        | num = <REALNUM> {System.out.println(num); return "real";}
+        | integer = <INTEGER> {System.out.println(integer); return "integer";}
+        | str = <STRING> {System.out.println(str); return "string";}
         | lp = <LP> {System.out.println(lp);} Condition_Exp() rp = <RP> {System.out.println(rp);}
-        | id = <IDENTIFIER> {System.out.println(id);} ArgList(id.image) )
-        {
-        	if(num != null){
-        		tipo = "real";
-        	}else if(integer != null){
-        		tipo = "integer";
-        	}else if(str != null){
-        		tipo = "string";
-        	}else if(id != null){
-        		tipo = findSymbol(id.image).tipo.id;
-        	}
-        	return tipo;
-        }
+        | id = <IDENTIFIER> {System.out.println(id);return findSymbol(id.image).tipo.id;} ArgList(id.image) )
+
 
     }
     String Variable():
@@ -696,8 +655,9 @@ PARSER_END(Jason)
         	 if(aux != null){
         	 	return aux.tipo.id;
         	 }else{
+                err_count++;
+                throw new ParseException("Erro, variavel nao declarada!");
         	 	System.out.println("Erro, variavel não declarada!");
-        	 	err_count++;
         	 	return "invalid";
         	 }
 

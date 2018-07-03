@@ -1,4 +1,5 @@
 program PROGRAM_NAME ;
 begin
-call identifier () 
+call identifier () 
+
 end .
