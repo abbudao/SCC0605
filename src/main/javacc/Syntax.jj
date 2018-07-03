@@ -104,20 +104,17 @@ PARSER_END(Jason)
     /*Programa e Bloco*/
     void Program():
     {Token point;
-	 symbol_table.add(new Simbolo("integer", 0, "type", null));
-     symbol_table.add(new Simbolo("real", 0, "type", null));
-     symbol_table.add(new Simbolo("string", 0, "type", null));
-     symbol_table.add(new Simbolo("array", 0, "type", null));
-     symbol_table.add(new Simbolo("procedure", 0, "proc", null));
-     symbol_table.add(new Simbolo("function", 0, "func", null));
-	}
-    {
-    Header() DeclSec() Block()point =<POINT>
-    {System.out.println(point);}
-    {
-        System.out.println("\nCompilacao finalizada com " + err_count + " erros\n\n\n");
+        symbol_table.add(new Simbolo("integer", 0, "type", null));
+        symbol_table.add(new Simbolo("real", 0, "type", null));
+        symbol_table.add(new Simbolo("string", 0, "type", null));
+        symbol_table.add(new Simbolo("array", 0, "type", null));
+        symbol_table.add(new Simbolo("procedure", 0, "proc", null));
+        symbol_table.add(new Simbolo("function", 0, "func", null));
     }
     {
+    Header() DeclSec() Block()point =<POINT>{System.out.println(point);}
+    {
+        System.out.println("\nCompilacao finalizada com " + err_count + " erros\n\n\n");
         if(err_count>0){
         throw new ParseException("Compilação finalizada com erros!");
         }
@@ -244,10 +241,8 @@ PARSER_END(Jason)
     void IdList(String type):
     {Token id = null, coma = null, id2;}
     {   
-        (LOOKAHEAD(2) id = <IDENTIFIER> coma = <COMA>)* id2 = <IDENTIFIER>
-        {if(id != null)System.out.println(id);}
-        {if(coma != null)System.out.println(coma);}
-        {System.out.println(id2);}
+        (LOOKAHEAD(2) id = <IDENTIFIER>{System.out.println(id);} coma = <COMA>{System.out.println(coma);})*
+        id2 = <IDENTIFIER>{System.out.println(id2);}
         {	
         	Simbolo id_symbol = null;
         	if(id != null)
@@ -391,16 +386,14 @@ PARSER_END(Jason)
     void FunctionBlock():
     {Token begin, end;}
     {
-        begin = <BEGIN> [Statements()] ReturnStatement() end = <END>
-        {System.out.println(begin);}
-        {System.out.println(end);}
+        begin = <BEGIN>{System.out.println(begin);} 
+        [Statements()] ReturnStatement() end = <END>{System.out.println(end);}
     }
     /* Comandos */
     void Statements():
     {Token eol = null;}
     {   
-        Statement() ( LOOKAHEAD(2)eol = <EOL>Statement())*
-        {if(eol != null)System.out.println(eol);}
+        Statement() ( LOOKAHEAD(2)eol = <EOL> {System.out.println(eol);}Statement())*
     }
 
     void Statement():
@@ -656,13 +649,12 @@ PARSER_END(Jason)
     {Token plus = null, less = null;
      String tipo = "invalid";}
     {
-        (plus = <PLUS>| less = <LESS>) tipo = Unary()
+        (plus = <PLUS> {System.out.println(plus);}| less = <LESS> {System.out.println(less);})
+        tipo = Unary()
         | tipo = Factor()
-        {if(plus != null)System.out.println(plus);}
-        {if(less != null)System.out.println(less);}
+        
         {
-
-        	return tipo;
+            return tipo;
         }
     }
     String Factor():
@@ -670,20 +662,13 @@ PARSER_END(Jason)
             lp = null, rp = null, id = null;
      String tipo = "invalid";}
     {
-        [til = <TIL>] (LOOKAHEAD(2)
+        [til = <TIL> {System.out.println(til);}] (LOOKAHEAD(2)
         tipo = Variable()
-        | num = <REALNUM>
-        | integer = <INTEGER>
-        | str = <STRING>
-        | lp = <LP> Condition_Exp() rp = <RP>
-        | id = <IDENTIFIER> ArgList(id.image) )
-        {if(til != null)System.out.println(til);}
-        {if(num != null)System.out.println(num);}
-        {if(integer != null)System.out.println(integer);}
-        {if(str != null)System.out.println(str);}
-        {if(lp != null)System.out.println(lp);}
-        {if(rp != null)System.out.println(rp);}
-        {if(id != null)System.out.println(id);}
+        | num = <REALNUM> {System.out.println(num);}
+        | integer = <INTEGER> {System.out.println(integer);}
+        | str = <STRING> {System.out.println(str);}
+        | lp = <LP> {System.out.println(lp);} Condition_Exp() rp = <RP> {System.out.println(rp);}
+        | id = <IDENTIFIER> {System.out.println(id);} ArgList(id.image) )
         {
         	if(num != null){
         		tipo = "real";
@@ -702,16 +687,10 @@ PARSER_END(Jason)
     {Token id, lbr = null, rbr = null, point = null,
             id2 = null, lbr2 = null, rbr2 = null;}
     {
-        id = <IDENTIFIER> [lbr = <LBR> Expression() rbr = <RBR>]
-            (point = <POINT> id2 = <IDENTIFIER> [lbr2 = <LBR>Expression() rbr2 = <RBR>])*
-
-        {System.out.println(id);}
-        {if(lbr != null)System.out.println(lbr);}
-        {if(rbr != null)System.out.println(rbr);}
-        {if(point != null)System.out.println(point);}
-        {if(id2 != null)System.out.println(id2);}
-        {if(lbr2 != null)System.out.println(lbr2);}
-        {if(rbr2 != null)System.out.println(rbr2);}
+        id = <IDENTIFIER> {System.out.println(id);} [lbr = <LBR> {System.out.println(lbr);} Expression()
+        rbr = <RBR> {System.out.println(rbr);}]
+            (point = <POINT> {System.out.println(point);}
+ id2 = <IDENTIFIER> {System.out.println(id2);} [lbr2 = <LBR>Expression() rbr2 = <RBR> {System.out.println(rbr2);}])*
 		{
         	 Simbolo aux = findSymbol(id.image);
         	 if(aux != null){
@@ -728,34 +707,25 @@ PARSER_END(Jason)
     {Token equal = null, ex= null, gr= null,
             ls = null, loe = null, goe = null;}
     {
-        (equal = <EQUAL>)
-        | (ex = <EXCLAMATION>)
-        | (gr = <GREATERTHAN>)
-        | (ls = <LESSTHAN>)
-        | (loe = <LOE>)
-        | (goe = <GOE>)
-
-        {if(equal != null)System.out.println(equal);}
-        {if(ex != null)System.out.println(ex);}
-        {if(gr != null)System.out.println(gr);}
-        {if(ls != null)System.out.println(ls);}
-        {if(loe != null)System.out.println(loe);}
-        {if(goe != null)System.out.println(goe);}
+        (equal = <EQUAL>){System.out.println(equal);}
+        | (ex = <EXCLAMATION>){System.out.println(ex);}
+        | (gr = <GREATERTHAN>){System.out.println(gr);}
+        | (ls = <LESSTHAN>){System.out.println(ls);}
+        | (loe = <LOE>){System.out.println(loe);}
+        | (goe = <GOE>){System.out.println(goe);}
     }
     void AddOp():
     {Token plus = null, less = null;}
     {
-        plus = <PLUS>
-        | less = <LESS>
+        plus = <PLUS>{System.out.println(plus);}
+        | less = <LESS>{System.out.println(less);}
 
-        {if(plus != null)System.out.println(plus);}
-        {if(less != null)System.out.println(less);}
+        
+        
     }
     void MultOp():
     {Token times = null, div = null;}
     {
-        times = <TIMES> | div = <DIV>
-        {if(times != null)System.out.println(times);}
-        {if(div != null)System.out.println(div);}
-
+        times = <TIMES>{System.out.println(times);}
+        | div = <DIV>{System.out.println(div);}
     }
