@@ -9,12 +9,11 @@
 \usepackage{syntax}
 \usepackage{cite}
 \usepackage{listings}
-
 \usepackage{etoolbox} % for patching
 \input{./mymacros}
 \usepackage{DocumentStyle}
 
-\title{Compiladores - Entrega 1}
+\title{Compiladores - Entrega 3}
 
 \begin{document}
 \input{./cover}
@@ -22,42 +21,285 @@
 \clearpage
 
 \section{Introdução}
-	Neste trabalho, foi implementado um \textit{parser} para a linguagem Jason, utilizando a ferramenta JavaCC. Nele, definiram-se as regras da linguagem, com a notação EBNF (\textit{Extended Backus–Naur Form}), e os \textit{tokens} da mesma, a serem gerados pelo \textit{parser}.
+	Neste trabalho, desenvolveu-se um analisador semântico para a linguagem Jason com base no analisador sintático feito anteriormente. O analisador criado, recebe como entrada o código analisado pelo léxico e o sintático, e procura por erros semânticos no programa.
     
-    Além disso, foram desenvolvidos casos de teste para diversas funcionalidades da linguagem, utilizando o \textit{framework} de teste JUnit para executar todos os testes, apoiado na \emph{Build Tool} chamada \emph{Gradle}. Os testes foram dividos em testes que deveriam ser aceitos pelo \emph{parser} e testes onde o \emph{parser} deveria gerar erros.
-    
-\section{Questões}
-%acho q seria interessante formatar melhor esse texto
-	Antes de iniciar a construção do analisador léxico, algumas decisões de projeto devem ser tomadas. Com este propósito, propôs-se perguntas a serem respondidas sobre a linguagem:
+\section{Considerações Semânticas}
     \begin{enumerate}
-      \item A linguagem permite comentário dentro de comentário? São sensíveis à linha? Qual o marcador de comentário?
-      	
-        Resposta: A linguagem não permite comentários dentro de comentário, sendo que o comentários são sensíveis à linha e possuem como marcador o símbolo '\#'. 
+    	\item  Tempo de vida, visibilidade e escopo para identificadores
+        	
+            
+            Os identificadores são visíveis apenas no bloco em que foram declarados e em blocos com níveis maiores, e são excluídos ao fim de cada bloco.
+            
         
-      \item Os identificadores e as palavras-reservadas serão \textit{case-sensitive}? Ou seja, haverá diferenciação entre letras minúsculas e maiúsculas?
-      
-      Resposta: Sim, os identificadores e as palavras reservadas serão \textit{case-sensitive}.
-      
-      \item Os identificadores terão tamanho máximo de caracteres? Se não, há número de caracteres para diferenciação? 
-      
-      Resposta:Os identificadores não terão um tamanho máximo de caracteres e não haverá número de caracteres para diferenciação.
-      
-      \item Conjunto de palavras reservadas:
-      
-            \begin{symbols}[Palavras-Chave da linguagem]
-        \begin{align*}\
-          \mathtt{V_t} = \big(\lit{begin}, \lit{end}, \lit{program}, \lit{types}, \lit{array}, \lit{record},
-          \lit{variables},\\ \lit{real}, \lit{integer}, \lit{string}, \lit{procedure},
-          \lit{parameters}, \lit{var}, \\\lit{function}, \lit{returns}, \lit{read}, \lit{set}, \lit{write}, \lit{if}, 					\lit{then},
-          \lit{while},\\ \lit{do}, \lit{endwhile}, \lit{untill}, \lit{enduntil}, \lit{call}, \lit{else},
-        \lit{endif}, \lit{return}\big)
-      \end{align*}
-      \end{symbols}
-      
-      \item  Constantes permitidas: real, integer e string.
-      
-      \item Caracteres não imprimíveis e símbolos especiais: a linguagem não os aceita.
+        \item Procedimentos/Funções aninhados
+        
+        	A linguagem permite procedimentos e funções aninhadas. Para procedimentos,  a regra 24 comprova isso e para funções, a regra 25.
+        
+        \item Passagem de parâmetros de que tipo?
+        	
+            Em Jason, os parâmetro podem ser passados ou por valor ou por referência. Segundo a regra 31, pode-se utilizar ou não $"var"$ antes de um parâmetro. Caso este termo opcional seja usado, a passagem será por referência, caso contrário, será por valor.
+        
+        \item Compilação independente, compilação em separado ou o programa está em um
+único arquivo? 
+        
+        A compilação dos programas é independente.
+        
     \end{enumerate}
+
+\section{Definição Formal de Jason}
+	Nesta seção encontram-se a definição formal da linguagem, em EBNF, além do conjunto de regras semânticas (RS), assim como os pontos de checagem das RS na linguagem.
+    
+    %fazer RS e incluir checagens
+    \subsection{Regras Semânticas}
+    
+    \begin{enumerate}
+    \item Se declarado(TS,s,nivelcorr) então erro(‘id já declarado’);
+insere(TS,s,ref);
+    \begin{enumerate}
+    	\item Atualiza os campos nível, categoria, valor e tipo\_c através da rotina seta\_atributos com: nivelcorr,
+constante, valor obtido da rs(1.b) x sinal ou rs(1.c) x sinal e tipo\_c obtido da rs(1.b) ou rs(1.c).
+		\item busca(TS, s, ref, achou);
+Se não achou ou (achou e categoria $<>$ constante)
+Então erro(‘constante não definida’)
+Senão obtém tipo\_c e valor através da rotina obtem\_atributos
+		
+        \item tipo\_c = inteiro; valor = valor obtido da conversão de s para int 
+	\end{enumerate}
+	\item Se declarado(TS,s,nivelcorr) então erro(‘id já declarado’);
+insere(TS, s, ref);
+permissão\_tipo\_array := true;
+
+	\item Atualiza os campos nível, categoria, nbytes e Pont\_tipo\_elementar através da rotina seta\_atributos com:
+nívelcorr, tipo, nbytes e tipo elementar com info da rs(10) ou com info do endereço do array quando tipo for
+array
+	
+    \item Se declarado(TS,s,nivelcorr) então erro(‘id já declarado’);
+insere(TS,s,ref); permissão\_tipo\_array := true;
+	
+    \item Atualiza os campos nível, categoria, tipo\_v das variáveis na TS através da rotina seta\_atributos com:
+nivelcorr, variável, o endereço fornecido pela rs(10);
+    \begin{enumerate}
+    \item Salva nível, categoria, tipo\_v
+    \end{enumerate}
+    
+    \item  Se declarado(TS,s,nivelcorr) então erro(‘id já declarado’);
+insere(TS,s,ref);
+Atualiza os campo nível e categoria através da rotina seta\_atributos com: nivelcorr, procedimento;
+npar := 0;
+nivelcorr:= nivelcorr + 1;
+
+	\item  Se declarado(TS,s,nivelcorr) então erro(‘id já declarado’);
+insere(TS,s,ref);
+Atualiza os campos nível e categoria através da rotina seta\_atributos com: nivelcorr, função;
+npar := 0;
+nivelcorr: nivelcorr + 1;
+
+	\item busca(TS,s,ref,achou);
+Se não achou ou (achou e a categoria $<>$ tipo) então erro(‘tipo não definido’)
+Senão atualiza tipo\_f;
+
+	\item elimina(TS,nivelcorr);
+{Não elimina as informações de tipo e passagem de parâmetros dos parâmetros de procedimentos/funções.
+Apagar os identificadores de parâmetros ou encadear a lista de parâmetros (tipo/passagem) na entrada de
+procedimentos para posterior checagem de tipos e passagem}
+nivelcorr := nivelcorr –1;
+
+	\item  busca(TS,s,ref,achou);
+Se não achou ou (achou e categoria $<>$ tipo) então erro(‘tipo não definido’)
+Senão Se permissão\_tipo\_array então End\_tipo:= ref
+ Senão Atualiza os campos nbytes e Pont\_tipo\_elementar da entrada do array 
+ 
+ 	\item  Se permissão\_tipo\_array então
+ insere na TS as informações sobre o tipo de dados array;
+ permissão\_tipo\_array := false;
+ End\_tipo := Ponteiro do descritor do array
+ Senão erro(‘array de várias dimensões não é permitido’)
+ 
+ 	\item permissão\_tipo\_array := true;
+ pos := ref;
+ 
+ 	\item classet := valor;
+    
+    \item classet := referencia;
+    
+    \item Se declarado(TS, s, nivelcorr) então erro(‘id já declarado’);
+insere(TS,s,ref); Atualiza os campos nível, categoria e classe\_transferência através da rotina seta\_atributos com:
+nivelcorr, parâmetro, classet;
+npar:= npar + 1;
+
+	\item Atualiza o campo tipo\_p com ref (endereço do tipo elementar)
+    \begin{enumerate}
+    \item tipo\_p := ref;
+    \end{enumerate}
+    
+    \item Atualiza o campo npar1 ou npar2 (do procedimento ou função que está apontado por pos);
+npar:= 0;
+
+	\item  Busca(TS, s, ref, achou);
+Se não achou então erro(‘id não declarado’)
+Senão obtém os atributos categoria e ref; c\_id:= categoria e p\_id := ref
+
+	\item Se c\_id $<>$ função então erro (‘função não definida’) \{com abre-parênteses\}
+    \begin{enumerate}
+    \item  Se (c\_id $<>$ função ou c\_id $<>$ parâmetro ou c\_id $<>$ variável ou c\_id $<>$ constante) então erro(‘função, 			variável, parâmetro ou constante não definidos’) \{sem abre-parênteses\}
+    \end{enumerate}
+    
+    \item  npar := npar + 1;
+    
+    \item Se c\_id $<>$ procedimento então erro(‘procedimento não definido’) \{com abre-parênteses\}
+    
+    \begin{enumerate}
+    \item Se (c\_id $<>$ função ou c\_id $<>$ variável ou c\_id $<>$ parâmetro ou c\_id $<>$ procedimento) então
+erro(‘função, procedimento, variável, ou parâmetro não definidos’) \{sem abre-parênteses\}
+    \end{enumerate}
+    
+    \item Transformar a cadeia de dígitos em um tipo numérico (inteiro ou real, quando for o caso)
+    
+    \item Se a categoria do objeto apontado por p_id = procedimento
+ então Se o número de parâmetros (npar1) <> npar então erro(‘incompatibilidade no número de parâmetros)
+ senão Se o número de parâmetros (npar2) <> npar então erro(‘incompatibilidade no número de parâmetros);
+npar:= 0;
+    \end{enumerate}
+    
+    \subsection{Linguagem em EBNF, com checagens}
+\begin{rules}[Programa e Bloco (EBNF)]
+    \begin{numberedgrammar}
+
+      <Program> ::= <Header> [<DeclSec>] <Block> \lit{.}
+
+      <Header> ::=  \lit{program} identifier \lit{;}
+
+      <Block> ::= \lit{begin} [<Statements>] \lit{end}
+
+      <DeclSec> ::=  types <TypeDecls> ( <VarDeclSec><SubProgramDecls>
+      \alt<SubProgramDecls>
+      \alt <VarDeclSec> 
+      \alt $\lambda$)
+      \alt [<VarDeclSec>] <SubProgramDecls> 
+
+      <TypeDecls> ::= \{<TypeDecl>\}
+
+      <TypeDecl> ::= identifier rs(2) <TypeSpecification> rs(3)
+
+      <TypeSpecification> ::= <ArraySpecification>
+      \alt <RecordSpecification>
+
+      <ArraySpecification> ::= array rs(11) <DataType> \lit{[}numericliteral\lit{]} \lit{;} 
+
+      <RecordSpecification> ::= record <VarDecls> end;
+
+      <VarDeclSec> ::= variables <VarDecls>
+
+      <VarDecls> ::= \{<VarDecls>\} <VarDecl>
+
+      <VarDecl> ::= <DataType> rs(5.a) <IdList> rs(5)\lit{;}
+
+      <DataType> ::= real
+      \alt integer
+      \alt identifier
+      \alt string 
+
+      <IdList> ::=  \{identifier rs(4) \lit{,}\} identifier rs(4)
+
+      <SubProgramDecls> ::= [<SubProgramDecls>]<SubProgramDecl>
+
+      <SubProgramDecl> ::= <ProcDecl>
+      \alt <FunctionDecl>
+
+      <ProcDecl> ::= <ProcHeader> <SubProgramDeclSec> <Block> rs(9)\lit{;}
+
+      <ProcHeader> ::= procedure identifier rs(6) rs(12)\lit{;}
+
+      <SubProgramDeclSec> ::= [<ParamDeclSec>] <DeclSec> 
+    \end{numberedgrammar}    
+    \end{rules}
+    
+    \begin{rules}[Declarações  (EBNF)]
+    \begin{numberedgrammar}
+      <ParamDeclSec> ::= parameters <ParamDecls> rs(17)
+
+      <ParamDecls> ::= [<ParamDecls>]<ParamDecl>
+
+      <ParamDecl> ::= rs(13) [var rs(14)]<DataType> rs(16.a) identifier rs(8) rs(15) rs(16)\lit{;}
+
+      <FunctionDecl> ::= <FunctionHeader> <SubProgramDeclSec> \\<FunctionBlock> rs(9) \lit{;}
+
+      <FunctionHeader> ::= function identifier rs(6) rs(12) returns <Datatype> \lit{;}
+
+      <FunctionBlock> ::= begin [<Statements>] <ReturnStatement> end
+
+      <Statements> ::= \{ <Statements> \lit{;}\} <Statement>
+
+      <Statement> ::= (read | write) <Variable> rs(18)
+      \alt set <Variable> rs(1) rs(21.a) = <Expression> rs(1.a) rs(16.a)
+      \alt if <Conditional\_Exp> then [<Statements>] <ElseClause>
+      \alt while <Conditional\_Exp> do [<Statements>] endwhile
+      \alt until <Conditional\_Exp> do [<Statements>] enduntil
+      \alt call identifier rs(18) rs(21.a) [ rs(21) <ArgList> rs(23)]
+      \alt <Ternary>
+
+      <Ternary> ::= <Conditional\_Exp>?[<Statements>]:[<Statements>]
+
+      <ElseClause> ::= [else] [<Statements>] endif
+
+      <ReturnStatement> ::= \lit{;} return \lit{(} <Conditional\_Exp> \lit{)}
+
+      <ArgList> ::= \lit{(} <Arguments> \lit{)}
+
+      <Arguments> ::= \{<Conditional\_Exp> rs(20)\lit{,}\} <Conditional\_Exp> rs(20)
+	  
+      <Conditional\_Exp> ::= <Condition> [ ? <Conditional\_Exp>\\ : <Conditional\_Exp>] 
+      
+      <Condition> ::= \{<CompoundCondition> $\backslash$ \}    <CompoundCondition>
+
+      <CompoundCondition> ::= \{<SimpleCondition> 
+      \\ '\&'\} <SimpleCondition>
+
+      <SimpleCondition> ::= \{<Expression> <RelOp>\} <Expression>
+
+      <Expression> ::= \{<Term> <AddOp>\} <Term>
+
+
+      <Term> ::= <Unary> \{<MultOp> <Factor>\}
+      
+    \end{numberedgrammar}\end{rules}
+    
+  \begin{rules}[Expressões (EBNF)]
+    \begin{numberedgrammar}
+      
+      <Unary> ::= \{(\lit{+} | \lit{-})\} <Factor> 
+
+      <Factor> ::= [ \textasciitilde ] (<Variable> rs(1.b)
+      \alt numericliteral rs(1.c) rs(22)
+      \alt stringliteral
+      \alt \lit{(}<Conditional\_Exp>\lit{)}
+      \alt identifier <Arglist>
+      \alt <Ternary>)
+
+      <Variable> ::= identifier rs(18)[\lit{[} <Expression> \lit{]}]\\ \{.identifier [\lit{[} <Expression> \lit{]}]\}
+
+      <RelOp> ::= \lit{=}
+      \alt \lit{!}
+      \alt `>'
+      \alt `<'
+      \alt `<='
+      \alt `>='
+
+      <AddOp> ::= \lit{+}
+      \alt \lit{-}
+
+      <MultOp> ::= \lit{*}
+      
+    \end{numberedgrammar}
+    \end{rules}
+\section{Tipo Abstrato de Dados Escolhido}
+	O Tipo Abstrato de Dados escolhido pelo grupo foi a lista encadeada não ordenada, por possuir alta eficiência na inserção (operação bastante frequente na análise semântica), com O(1). Uma eficiência razoável na busca, O(n), no pior caso. E uma eficiência também satisfatória na remoção, O(n), no pior caso. E, em termos de consumo de memória, essa estrutura também é econômica.
+    
+    Além disso, essa estrutura de dados foi escolhida pela facilidade de se trabalhar com ela, aumentando a produtividade do grupo, que já era familiarizado com ela. Assim, o uso da lista encadeada facilitou a criação do analisador semântico, armazenando a tabela de símbolos de maneira clara e intuitiva.
+    
+    Por fim, para parâmetros de \textit{procedures} e \textit{functions}, usou-se uma outra lista encadeada para salvá-los, na ordem em que estes são declarados.
+    
+
 \section{Utilzando e construindo a aplicação}
 \subsection{Rodando o Parser}
 Utilize o arquivo \emph{.jar} fornecido, ou construído nas subseções seguintes, da seguinte forma:
@@ -70,7 +312,7 @@ O programa espera como entrada um caminho para um arquivo ou caso não haja argu
 \subsection{Construindo o Parser}
 Pode-se construir o \emph{Parser} através dos códigos fontes. Para isto algumas dependências são necessárias:
 \begin{itemize}
-\item Certifique-se de ter o Java Development Kit 8 ou superior instalado. Caso não o tenha, \href{https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html}{siga estes passos} ou utilze seu gerenciador de pacotes.
+\item Certifique-se de ter o Java Development Kit 8 ou superior instalado. Caso não o tenha, \href{https://docs.oracle.com/javase/8/docs/technotes/guides/install/install\_overview.html}{siga estes passos} ou utilze seu gerenciador de pacotes.
 \item Instale o Gradle para automatização da \emph{build}. Encontre os passos para \href{https://gradle.org/install/}{sua distribuição aqui}. Alternativamente, use seu gerenciador de pacotes.
 \end{itemize}
 Descompacte os arquivos fontes do zip ou clone o repositório:
@@ -94,6 +336,9 @@ gradle test
 \end{lstlisting}
 O resultado da suite será mostrado no \emph{STDOUT} e um resultado detalhado também pode ser encontrado
 em \emph{``build/reports''}.
+
+
+
 \end{document}
 
 
